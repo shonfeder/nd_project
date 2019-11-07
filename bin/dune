@@ -1,0 +1,4 @@
+(executable
+ (public_name nd_project)
+ (name main)
+ (libraries nd_project core_kernel opium))
