@@ -1,0 +1,155 @@
+#+TITLE: A Tutorial Introduction to Front-End OCaml using js_of_ocaml
+
+* Basic setup for a full stack ocaml project:
+** TODO Initialize your project
+
+#+BEGIN_SRC sh
+dune init proj myproject --libs core_kernel,js_of_ocaml --ppx .. # TODO what else?
+cd myproject
+dune build
+#+END_SRC
+
+** Define your package
+
+In the =dune-project= file at your project root
+
+#+BEGIN_SRC dune
+(lang dune 1.11)
+(generate_opam_files true)
+
+(name myproject)
+(version 0.1.0)
+
+(authors "Your Name")
+; (license MIT)
+; (source (TODO))
+(maintainers "Your Info")
+; (homepage "TODO")
+; (bug_reports "TODO")
+; (documentation "TODO")
+
+(package
+ (name myproject)
+ (synopsis "TODO")
+ (description "TODO")
+ (depends
+  (dune (>= 1.11.3))
+
+  (ocaml (>= 4.08.0))
+  (core_kernel (>= v0.12.2))
+
+  (js_of_ocaml (>= 3.4.0))
+  (js_of_ocaml-ppx (>= 3.4.0))
+  (js_of_ocaml-ppx_deriving_json (>= 3.4.0))
+  (js_of_ocaml-lwt (>= 3.4.0))
+
+  (ppx_deriving (>= 4.4))
+))
+#+END_SRC
+
+Install the new deps
+
+#+BEGIN_SRC sh
+opam install . --deps-only
+#+END_SRC
+
+** TODO Add a frontend component
+
+While in the root directory of your project
+
+#+BEGIN_SRC sh
+dune init exe frontend frontend --public --libs core_kernel,js_of_ocaml --ppx js_of_ocaml-ppx
+#+END_SRC
+
+Makes an executable component in the =frontend= directory.
+
+Add the following alias to the =frontend/dune= file to make sure the js target
+is built:
+
+#+BEGIN_SRC dune
+;; TODO Explains
+(alias
+ (name default)
+ (deps main.bc.js))
+#+END_SRC
+
+** TODO Build and test the frontend
+
+#+BEGIN_SRC sh
+dune build @default
+node _build/default/frontend/main.bc.js
+#=> Hello, World!
+#+END_SRC
+
+** TODO Add a makefile to simplify builds
+
+# TODO move higher up? to start of tutorial?
+In your =Makefile=
+
+#+BEGIN_SRC makefile
+.DEFULAT_GOAL := all
+
+.PHONY: all
+all:
+	dune build @default
+
+.PHONY: deps
+deps:
+	-dune build
+	opam install . --deps-only --with-test
+#+END_SRC
+
+** TODO Add an opium backend
+
+# TODO Combine into initial deps section?
+
+Add opium as a dependency in the =dune-package= file
+
+#+BEGIN_SRC dune
+;..
+(depends
+ ;...
+ (opium (>= 0.17.1))
+)
+ ;..
+#+END_SRC
+
+Add opium as a library in you =bin/dune= file
+
+#+BEGIN_SRC dune
+(executable
+ (public_name nd_project)
+ (name main)
+ (libraries nd_project core_kernel opium))
+#+END_SRC
+
+* A reactive web app using incr_dom
+** TODO Add deps
+In =dune-project=
+
+#+BEGIN_SRC dune
+  (incr_dom (>= v0.12.0))
+  (ppx_jane (>= v0.12.0))
+#+END_SRC
+
+Install new deps with =make deps=
+
+** TODO Add libs and preprocessor to frontend component
+#+BEGIN_SRC dune
+
+(executable
+ ; ...
+ (libraries
+   ;...
+   incr_dom)
+ (preprocess
+  (pps
+    ;...
+    ppx_jane)))
+#+END_SRC
+
+Then check that building works
+
+** TODO Walk through basic app (adapting janestreet tutorial)
+
+*** TODO Build up the page by introducing =Vdom= =Node= elements
