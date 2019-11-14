@@ -126,20 +126,6 @@ module Expression = struct
       (* TODO quantifiers *)
     [@@deriving sexp, eq]
 
-    (* (\* TODO Does this really gain from GADTs? *\)
-     * (\** "The concept of a propositional expression, called a 'formula' for short "*\)
-     * type t =
-     *   | Elem of elementary
-     *   | Comp of compound
-     * [@@deriving sexp, eq]
-     * and compound =
-     *   | Not of t
-     *   | And of t * t
-     *   | Or  of t * t
-     *   | Imp of t * t
-     *   (\* TODO quantifiers *\)
-     * [@@deriving sexp, eq] *)
-
     let rec to_string = function
       | Elem e -> elementary_to_string e
       | Comp c -> compound_to_string c
@@ -157,6 +143,22 @@ module Expression = struct
     let and_ a b = Comp (And (a, b))
     let or_ a b  = Comp (Or (a, b))
     let imp a b  = Comp (Imp (a, b))
+
+    let get_not = function
+      | Comp (Not t) -> Some t
+      | _ -> None
+
+    let get_and = function
+      | Comp (And (a, b)) -> Some (a, b)
+      | _ -> None
+
+    let get_or = function
+      | Comp (Or (a, b)) -> Some (a, b)
+      | _ -> None
+
+    let get_imp = function
+      | Comp (Imp (a, b)) -> Some (a, b)
+      | _ -> None
 
     module Infix = struct
       let (!!) = not_
