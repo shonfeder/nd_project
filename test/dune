@@ -1,0 +1,3 @@
+(test
+ (name nd_project)
+ (libraries core_kernel))

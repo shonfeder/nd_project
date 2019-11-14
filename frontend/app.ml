@@ -1,6 +1,8 @@
 open Core_kernel
 open Incr_dom
 
+module Jsoo = Js_of_ocaml
+
 module Model = struct
   type t =
     { counter : int
@@ -78,6 +80,7 @@ let on_startup ~schedule_action:_ _ = Async_kernel.return ()
  *   in
  *   Node.body [] [ submission; input; submit_button; reset_button; incr_button ] *)
 
+
 let view (m : Model.t Incr.t) ~inject =
   let open Incr.Let_syntax in
   let open Vdom in
@@ -97,9 +100,18 @@ let view (m : Model.t Incr.t) ~inject =
         margin_top (`Px 20)
       )
     in
-    let ondrop = Attr.on "ondrop" (fun _ev -> inject Action.Incr_counter (* TODO replace with drop function *)) in
+    let ondrop = Attr.on "drop" (fun _ev ->
+        Jsoo.Firebug.console##log "ondrop triggered";
+        inject Action.Incr_counter (* TODO replace with drop function *))
+    in
+    let ondragover = Attr.on "dragover" (fun ev ->
+        Jsoo.Firebug.console##log "ondragover triggered";
+        Jsoo.Dom.preventDefault ev;
+        Event.Ignore
+      )
+    in
     let class_ = Attr.class_ "position"  in
-    let attrs = ondrop :: style :: class_ :: attrs in
+    let attrs = ondragover :: ondrop :: style :: class_ :: attrs in
     Node.div attrs content
   in
   let occupant = [Node.p [Attr.create "draggable" "true"] [Node.text "Drag Me"]]

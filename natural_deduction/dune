@@ -1,0 +1,5 @@
+(library
+ (name natural_deduction)
+ (libraries core_kernel)
+ (preprocess (pps ppx_jane ppx_deriving.std))
+)
