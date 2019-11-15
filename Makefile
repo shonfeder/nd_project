@@ -19,3 +19,7 @@ clean:
 .PHONY: run
 run: build
 	dune exec nd_project
+
+.PHONY: test
+test:
+	dune runtest
