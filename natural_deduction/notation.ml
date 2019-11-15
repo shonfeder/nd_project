@@ -209,12 +209,14 @@ module Expression = struct
     and compound_subformulas : compound -> t list = function
       | Not t -> subformulas t
       | And (a, b) | Or (a, b) | Imp (a, b) -> subformulas a @ subformulas b
-  end
 
+    include Infix
+  end
   (* TODO Sequents? *)
 end
 
 module Figure = struct
+  let ie = ie "finite sets of symbols" 70
 
   (* NOTE The same definition of figure works for sequents, if we end up wanting
      to handle those, we can just functorize the Figure module over an
@@ -262,6 +264,8 @@ module Figure = struct
       List.map ~f:initial_formulae d
       |> ListLabels.flatten
 
+  let assume p = Initial p
+
   (* let ex =
    *   let a = Formula.prop "A"
    *   and b = Formula.prop "B"
@@ -275,6 +279,4 @@ module Figure = struct
    *   | Infer of upper * lower
    *   (\** "A {i proof figure}, called a {i derivation} for short..." (72) *\)
    *   | Deriv of t list * endformula *)
-
-  let ie = ie "finite sets of symbols" 70
 end
