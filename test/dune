@@ -1,3 +1,4 @@
 (test
- (name nd_project)
- (libraries core_kernel))
+ (name test)
+ (libraries natural_deduction core_kernel qcheck qcheck-alcotest alcotest)
+ (preprocess (pps ppx_jane)))

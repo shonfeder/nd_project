@@ -32,4 +32,7 @@
 
   (ppx_deriving (>= 4.4))
   (ppx_jane (>= v0.12.0))
+
+  (qcheck (>= 0.12))
+  (qcheck-alcotest (>= 0.12))
 ))
