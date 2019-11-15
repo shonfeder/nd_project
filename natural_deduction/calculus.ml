@@ -81,7 +81,7 @@ module Intro = struct
     fun f fig ->
     let open Option.Monad_infix in
     let open Formula.Infix in
-    imp f fig >>= fun fig ->
+    imp f fig >>= fun _implies_false ->
     let conclusion = Figure.endformula fig in
     Option.some_if Formula.(equal (def F) conclusion) begin
       deriv
