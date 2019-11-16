@@ -1,15 +1,43 @@
-#+TITLE: A Tutorial Introduction to Front-End OCaml using js_of_ocaml
+#+TITLE: [WIP] A Tutorial Introduction to Full Stack OCaml using js_of_ocaml and Opium
+
+*NOTE*: This material may eventually be used to build out a tutorial, but
+ currently they are very much just working notes jotted down as I figure things
+ out.
 
 * Basic setup for a full stack ocaml project:
-** TODO Initialize your project
+** TODO Frontend
+*** TODO Initialize your project
 
 #+BEGIN_SRC sh
-dune init proj myproject --libs core_kernel,js_of_ocaml --ppx .. # TODO what else?
+dune init proj myproject --libs core_kernel,js_of_ocaml # TODO what else?
 cd myproject
 dune build
 #+END_SRC
 
-** Define your package
+*** Add a makefile to simplify builds
+Create a file =Makefile= at the root with
+
+#+BEGIN_SRC makefile
+.DEFULAT_GOAL := all
+
+.PHONY: deps
+deps:
+	-dune build
+	opam install . --deps-only --with-test
+
+.PHONY: build
+build:
+	dune build @default
+
+.PHONY: all
+all: deps build
+
+.PHONY: run
+run: build
+	dune exec myproject
+#+END_SRC
+
+*** Define your package and dependencies
 
 In the =dune-project= file at your project root
 
@@ -50,10 +78,10 @@ In the =dune-project= file at your project root
 Install the new deps
 
 #+BEGIN_SRC sh
-opam install . --deps-only
+make deps
 #+END_SRC
 
-** TODO Add a frontend component
+*** TODO Add a frontend component
 
 While in the root directory of your project
 
@@ -73,7 +101,7 @@ is built:
  (deps main.bc.js))
 #+END_SRC
 
-** TODO Build and test the frontend
+*** TODO Build and test the frontend
 
 #+BEGIN_SRC sh
 dune build @default
@@ -81,25 +109,10 @@ node _build/default/frontend/main.bc.js
 #=> Hello, World!
 #+END_SRC
 
-** TODO Add a makefile to simplify builds
+Check =frontend/main.ml= to see the source code executed to greet you.
 
-# TODO move higher up? to start of tutorial?
-In your =Makefile=
-
-#+BEGIN_SRC makefile
-.DEFULAT_GOAL := all
-
-.PHONY: all
-all:
-	dune build @default
-
-.PHONY: deps
-deps:
-	-dune build
-	opam install . --deps-only --with-test
-#+END_SRC
-
-** TODO Add an opium backend
+** TODO Backend
+*** Add Opium as a dependency backend
 
 # TODO Combine into initial deps section?
 
@@ -118,11 +131,79 @@ Add opium as a library in you =bin/dune= file
 
 #+BEGIN_SRC dune
 (executable
- (public_name nd_project)
+ (public_name myproject)
  (name main)
- (libraries nd_project core_kernel opium))
+ (libraries core_kernel opium))
 #+END_SRC
 
+Update the deps
+
+#+BEGIN_SRC
+make deps
+#+END_SRC
+*** TODO Add static content
+In =public/index.html=:
+
+#+BEGIN_SRC html
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN"
+  "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>My Title</title>
+    <meta http-equiv="Content-Type"
+    content="text/html; charset=utf-8" />
+    <script type="text/javascript" src="/js/main.bc.js"></script>
+  </head>
+</html>
+
+#+END_SRC
+
+*** TODO Serve your static content
+
+In =bin/main.ml=
+
+#+BEGIN_SRC ocaml
+open Opium.Std
+
+let js =
+  Middleware.static
+    (* TODO move to a nicer place? *)
+    ~local_path:"./_build/default/frontend"
+    ~uri_prefix:"/js"
+    ()
+
+let index =
+  Middleware.static
+    ~local_path:"./public"
+    ~uri_prefix:"/"
+    ()
+
+let root =
+  get "/" begin fun _req ->
+    redirect' (Uri.of_string "/index.html")
+  end
+
+let () =
+  print_endline (Sys.getcwd ());
+  App.empty
+  |> middleware js
+  |> middleware index
+  |> root
+  |> App.run_command
+#+END_SRC
+
+*** TODO Run the server
+
+#+BEGIN_SRC sh
+make run
+#+END_SRC
+
+And navigate to [[http://localhost:3000/]].
+
+*NOTE:* These WIP notes don't currently guide the reader to add any js code that
+ would show up when the page is loaded, so unless they've suplied that
+ themselves, the page will be blank.
 * A reactive web app using incr_dom
 ** TODO Add deps
 In =dune-project=
