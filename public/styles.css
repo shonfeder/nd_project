@@ -36,11 +36,22 @@ body {
     padding-bottom: .1em;
 }
 
+/* RULES */
+
 .rule {
     font-size: .5em;
     align-self: flex-end;
     margin-bottom: 3em;
     margin-right: 2em;
+}
+
+.rule > .operator {
+    margin-right: 0;
+    font-size: 1.2em;
+}
+
+.rule > .direction {
+    font-size: .7em;
 }
 
 /***********/
