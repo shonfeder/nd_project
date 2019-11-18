@@ -1,0 +1,58 @@
+#+TITLE: ND Project
+
+A pedagogical web toy for learning and playing with Gentzen's natural deduction.
+
+#+BEGIN_QUOTE
+deduction (n.)
+
+early 15c., /deduccioun/, "a bringing, a leading;" mid-15c., "action of
+deducting; a taking away, a number or amount subtracted," from Old French
+deduction (Modern French /déduction/) and directly from Latin /deductionem/
+(nominative deductio) "a leading away, an escorting; a diminution," noun of
+action from past-participle stem of /deducere/ "lead or bring away or down;
+derive" (in Medieval Latin, "infer logically"), from /de/ "down" (see de-) +
+/ducere/ "to lead," from PIE root /*deuk-/ "to lead."
+
+Meaning "that which is deducted" is from 1540s. As a term in logic, "derivation
+as a result from a known principle, an inference, conclusion," 1520s, from Late
+Latin use of /deductio/ as a loan-translation of Greek /apagoge/. Related:
+Deductional.
+#+END_QUOTE
+
+* Related work
+** TODO *Natural Deduction*: Google Play app by Laurent Théry
+https://play.google.com/store/apps/details?id=org.inria.peanoware&hl=en_US
+
+- Platform specific (Android)
+- Does not appear to include instructional material or design elements
+** TODO *NaturalDeduction* Windows app by Jukka Häkkinen
+https://www.microsoft.com/en-us/p/naturaldeduction/9ndb7hz5pfm0?activetab=pivot:overviewtab#
+
+- Platform specific (Windows)
+- Linear presentation rather than tree based
+- Does not appear to include instructional material or design elements
+
+* Tasks
+** TODO Name
+- Deduction + Education
+  - de∘ed∘euc∘ea∘etion
+  - edu∘deduction
+  - (Educa|Deduc)iton
+** TODO Add interactive illumination of proof parts on hover/click
+- When an operator is hovered over, illuminate scope of sub formulae
+- Hover on assumption to illuminate all uses
+- Indicate when formula is still under license of assumption
+** TODO Add tutorial
+*** Principles
+**** Introduction and Elimination
+**** Conjunction
+***** Forming Collections
+***** Making Selections
+**** Implication
+***** Drawing Connections
+***** Producing Results
+**** Disjunction
+***** Adding Alternatives
+***** Dealing with Outcomes
+**** Negation
+***** Rejecting Absurdity
