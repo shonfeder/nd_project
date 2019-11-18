@@ -48,7 +48,7 @@ following results from selecting the terminal =∧=:
  
   #+BEGIN_SRC
 
-  ⋮    ⋮
+  ⋮   ⋮
   A   B
   ————— ∧I
   A ∧ B
@@ -181,7 +181,7 @@ They then select the terminal =∨= in the assumption:
 
 #+BEGIN_SRC
             |X|   |Y|
-             ⋮      ⋮
+             ⋮     ⋮
   |X ∨ Y|   {δ}   {δ}
   ————————————————————— ∨E
              ⋮
@@ -203,7 +203,7 @@ following:
 #+BEGIN_SRC
                       +—————+
             |X|   |Y| |  ∨  |
-             ⋮      ⋮ <______|
+             ⋮     ⋮ <______|
   |X ∨ Y|   {δ}   {δ}
   ————————————————————— ∨E
              ⋮
@@ -218,7 +218,7 @@ Selecting the =∨= yields
                        |Y|
                  ——————————————— ∨I_
             |X|  [_ ∨ Y] [Y ∨ _]
-             ⋮      ⋮
+             ⋮     ⋮
   |X ∨ Y|   {δ}   {δ}
   ————————————————————— ∨E
              ⋮
@@ -239,7 +239,7 @@ will be thickened to produce:
 
 #+BEGIN_SRC
             |X|                      |Y|
-             ⋮                         ⋮
+             ⋮                        ⋮
 |X ∨ Y|   (X ∨ A) ∨ (Y ∨ B)   (X ∨ A) ∨ (Y ∨ B)
 ——————————————————————————————————————————————- ∨E
      (X ∨ A) ∨ (Y ∨ B)
