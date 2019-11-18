@@ -1,0 +1,303 @@
+#+TITLE: Design Notes
+
+* Principles
+** UI
+- Discoverability :: New users should be able find new functionality easily and
+  intuitively.
+- Learnability :: Each new concept and capability should be introduced in a way
+  that is a natural outgrowth of the previous ones. The interface should provide
+  multiple queues to help support the learners understanding and recognition.
+- Empowerment :: People who don't have a solid grasp of logic should come away
+  from their time playing with greater ability to recognize and leverage logical
+  patterns of construction.
+
+** Development
+- Begin with formally correct and clear representation, and grow towards
+  intuitively compelling and (hopefully) poetic representations. Since the form
+  captures the pattern, we don't want to convolute things through premature
+  concretization.
+- Everything is derived from the model: do not store any logic in the DOM, it
+  must all be stored in the model and elaborated out into the DOM during
+  reactive.
+
+
+* UI Laws
+
+- Selecting a =⋮= presents possibilities to select from.
+
+* Building Proofs
+Proofs unfold/grow/blossom from their roots.
+
+While building proofs, users see "partial proofs", which is a proof with "holes"
+in it. A "hole" is a "potential branch" or a "twig": a direction the tree must
+grow before sprouting leaves.
+
+** Partial proofs: sprouting twigs
+
+At the start, a user finds a formula which is to be deconstructed into a proof.
+Using Gentzen's proof trees, this has the pleasant aesthetic of growing a
+derivation tree from a seed formula (the conclusion).
+
+Sprouting twigs corresponds to introduction rules, they move the proof search
+up, from a conclusion towards the leaves.
+
+*** Conjunction: Sprouting two twigs
+
+Selecting the terminal symbol of a compound formula sprouts a twig. E.g. the
+following results from selecting the terminal =∧=:
+ 
+  #+BEGIN_SRC
+
+  ⋮    ⋮
+  A   B
+  ————— ∧I
+  A ∧ B
+  #+END_SRC
+
+The =⋮= are twigs. They must be fullfilled into their own derivations
+(termination at some leaves, i.e., assumptions), before the proof can be
+completed.
+
+*** Disjunction: Selecting between possible twigs
+
+Sometimes a formula can be constructed in more than one way, in that case, the
+user is presented with a partial rule, and an interface for selecting viable
+candidates. E.g., if a user selects a terminal =∨= in =A ∨ B=:
+
+#+BEGIN_SRC
+    ⋮
+   [ ]
+————————— ∨I_
+[A] ∨ [B]
+#+END_SRC
+
+Where the brackets above the bar will be filled with whichever bracketed formula
+is selected. The corresponding direction indicator will be supplied in the =_=
+in the rule.
+
+*** Implication: Promising a production
+
+/Implication is special/: it sprouts a twig destined for a predetermined leaf.
+E.g. selecting a terminal =→=:
+
+#+BEGIN_SRC
+ |A|
+  ⋮
+  B
+————— →I
+A → B
+#+END_SRC
+
+Note that a leaf assumption =[A]= is posited in advance, and the twig connects
+the leaf to the root. The user must then proceed to fill in the dots by deriving
+a =B=. At this point, the modality may switch from sprouting twigs (proof
+search) to "sending down roots".
+
+** Sending down roots
+
+Sending down roots corresponds to elimination rules.
+
+*** Conjunction introduction
+
+Given the following partial
+proof, the user must find a way of "thickening" the twig. This can only be done
+by showing how the consequent of the conclusion formula can be derived from the
+posited assumption:
+
+#+BEGIN_SRC
+  |A ∧ B|
+     ⋮
+——————————— →I
+(A ∧ B) → B
+#+END_SRC
+
+Selecting the terminal =∧= in the assumption produces an interface dual to that
+for disjunction introduction:
+
+#+BEGIN_SRC
+|[A] ∧ [B]|
+——————————— ∧E_
+    [ ]
+——————————— →I
+(A ∧ B) → B
+#+END_SRC
+
+The open brackets will be filled with whichever bracketed formula is selected,
+and the =_= in the rules will be supplied accordingly. If the derivation is
+sufficient to derive the conclusion below the bar, the proof will be completed,
+if not, a new twig will be sprouted below the conclusion.
+
+*** Implication introduction
+
+Suppose the user has produced the following partial proof by selecting the
+terminal =→= in the conclusion:
+
+#+BEGIN_SRC
+ |A ∧ A → B|
+      ⋮
+ ———————————
+      B
+——————————————— →I
+(A ∧ A → B) → B
+#+END_SRC
+
+They can then proceed to use conjunction elimination to derive either =A= or =A
+→ B=, but in order to complete the proof they actually need *booth*. Duplication
+of assumptions (cloning leaves) is often needed in ND proofs.
+
+*** Duplicating assumptions/Cloning leaves
+
+When a user selects an assumption, (this must be disambiguated somehow from
+selecting the terminal symbol of the assumption formula), it duplicates the
+assumption and "bifurcates" the twig:
+
+#+BEGIN_SRC
+|A ∧ A → B|   |A ∧ A → B|
+      ⋮             ⋮
+—————————————————————————— _
+            ⋮
+       ——————————— _
+            B
+     ——————————————— →I
+     (A ∧ A → B) → B
+#+END_SRC
+
+The user can then proceed via conjunction elim on both assumptions, followed by
+implication elim.
+
+*** Disjunction Elimination
+
+Suppose the user had selected the terminal =→= to form the following partial proof:
+
+#+BEGIN_SRC
+          |X ∨ Y|
+             ⋮
+    ((X ∨ A) ∨ (Y ∨ B))
+——————————————————————————— →I
+X ∨ Y → ((X ∨ A) ∨ (Y ∨ B))
+#+END_SRC
+
+They then select the terminal =∨= in the assumption:
+
+#+BEGIN_SRC
+            |X|   |Y|
+             ⋮      ⋮
+  |X ∨ Y|   {δ}   {δ}
+  ————————————————————— ∨E
+             ⋮
+     (X ∨ A) ∨ (Y ∨ B)
+——————————————————————————— →I
+X ∨ Y → ((X ∨ A) ∨ (Y ∨ B))
+#+END_SRC
+
+The ={δ}= indicates that the same formula must be derived from both assumptions.
+
+They can either proceed by /ad hoc/ disjunction introductions on =X= and =Y=, or
+by /focusing/ on the consequent which is to be derived.
+
+**** ad hoc disjunction introduction
+
+The user selects the =⋮= under the assumed =Y=, producing an interface like the
+following:
+
+#+BEGIN_SRC
+                      +—————+
+            |X|   |Y| |  ∨  |
+             ⋮      ⋮ <______|
+  |X ∨ Y|   {δ}   {δ}
+  ————————————————————— ∨E
+             ⋮
+     (X ∨ A) ∨ (Y ∨ B)
+——————————————————————————— →I
+X ∨ Y → ((X ∨ A) ∨ (Y ∨ B))
+#+END_SRC
+
+Selecting the =∨= yields
+
+#+BEGIN_SRC
+                       |Y|
+                 ——————————————— ∨I_
+            |X|  [_ ∨ Y] [Y ∨ _]
+             ⋮      ⋮
+  |X ∨ Y|   {δ}   {δ}
+  ————————————————————— ∨E
+             ⋮
+     (X ∨ A) ∨ (Y ∨ B)
+——————————————————————————— →I
+X ∨ Y → ((X ∨ A) ∨ (Y ∨ B))
+#+END_SRC
+
+When the user selects one of the empty brackets, they will be prompted with
+possible formulae to introduce at that position.
+
+**** Focusing
+
+If they select the =⋮= above the consequent, it will project the consequent in
+an alpha reduced form onto the two ={̣δ}=. When the user selects the formula, it
+confirms that the =∨E= is meant to produce the consequent directly, and the twig
+will be thickened to produce:
+
+#+BEGIN_SRC
+            |X|                      |Y|
+             ⋮                         ⋮
+|X ∨ Y|   (X ∨ A) ∨ (Y ∨ B)   (X ∨ A) ∨ (Y ∨ B)
+——————————————————————————————————————————————- ∨E
+     (X ∨ A) ∨ (Y ∨ B)
+——————————————————————————— →I
+X ∨ Y → ((X ∨ A) ∨ (Y ∨ B))
+#+END_SRC
+
+At this point the user can then proceed to grow the tree up from the two
+disjunctions. This strategy is generally more elegant.
+** Negation
+
+Selecting the =¬= in the terminal symbol of the conclusion produces the
+following partial proof:
+
+#+BEGIN_SRC
+ |A|
+  ⋮
+  ⊥
+————— ¬I
+ ¬A
+#+END_SRC
+
+Now it's a problem of "sending down roots" which culminate in the derivation of
+a contradiction.
+
+
+* Metaphors
+- Proofs are trees
+- Conjunction are consolidations
+- Disjunctions are possibilities
+- Implications are productions (of the consequent from the antecedent)
+- Negations are refutations
+
+* Tasks
+** TODO Name
+- ND Project
+- Deduction + Education
+  - de∘ed∘euc∘ea∘etion
+  - edu∘deduction
+  - (Educa|Deduc)iton
+** TODO Add interactive illumination of proof parts on hover/click
+- When an operator is hovered over, illuminate scope of sub formulae
+- Hover on assumption to illuminate all uses
+- Indicate when formula is still under license of assumption
+** TODO Detect unsolvable proofs and alert user
+** TODO Add tutorial
+*** Principles
+**** Introduction and Elimination
+**** Conjunction
+***** Forming Collections
+***** Making Selections
+**** Implication
+***** Drawing Connections
+***** Producing Results
+**** Disjunction
+***** Adding Alternatives
+***** Dealing with Outcomes
+**** Negation
+***** Rejecting Absurdity
+** TODO Develop highly intuitive disjunction elim
+** TODO Implement UI for cuts
