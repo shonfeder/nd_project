@@ -1,0 +1,96 @@
+/***********/
+/* GENERAL */
+/***********/
+
+body {
+    font-size: 1.2em;
+}
+
+/***********/
+/* FIGURES */
+/***********/
+
+.proof {
+    display: inline-block;
+}
+
+.derivation {
+    display: flex;
+}
+
+.inference {
+    align-self: flex-end;
+}
+
+.upper {
+    display: flex;
+    justify-content: center;
+}
+
+.lower {
+    border-top-style: solid;
+    border-top-width: .15em;
+    justify-content: center;
+    display: flex;
+    padding-top: .3em;
+    padding-bottom: .1em;
+}
+
+.rule {
+    font-size: .5em;
+    align-self: flex-end;
+    margin-bottom: 3em;
+    margin-right: 2em;
+}
+
+/***********/
+/* FORMULA */
+/***********/
+
+.formula {
+    margin-left: 20px;
+    margin-right: 20px;
+}
+
+.assumption {
+    align-self: flex-end;
+}
+
+.assumption > .formula {
+    padding-left: .2em;
+    padding-right: .2em;
+    border-left-style: dotted;
+    border-right-style: dotted;
+    border-color: darkgray;
+    border-left-width: .1em;
+    border-right-width: .1em;
+}
+.operator {
+    margin-left: 5px;
+    margin-right: 5px;
+    /* font-size: 1.2em; */
+}
+
+.negation-op {
+    margin-right: 0;
+    margin-left: 0;
+}
+
+/* compound formula */
+
+.compound {
+    padding-left: .2em;
+    padding-right: .2em;
+    border-left-style: solid;
+    border-right-style: solid;
+    border-color: lightgrey;
+    border-left-width: .1em;
+    border-right-width: .1em;
+    border-radius: 5px;
+}
+
+/* bracketing not needed on prefix negation compounds */
+.negation {
+    border-style: none;
+    padding-left: 0;
+}

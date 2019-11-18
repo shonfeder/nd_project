@@ -13,7 +13,7 @@ let ie description page = Excerpt.gentzen_nd description (`Pg page)
 
 module Symbol = struct
   type prop = T | F
-  [@@deriving sexp, eq]
+  [@@deriving sexp, eq, compare]
 
   let prop_to_string = function
     | T -> "T"
@@ -31,6 +31,8 @@ module Symbol = struct
     | Not
     | All
     | Exists
+    | Explode
+  [@@deriving sexp, compare, show]
 
   type const =
     | Object of int
@@ -41,9 +43,9 @@ module Symbol = struct
 
   module Var : sig
     type prop = private string
-    [@@deriving sexp, eq]
+    [@@deriving sexp, eq, compare]
     type obj = private string
-    [@@deriving sexp, eq]
+    [@@deriving sexp, eq, compare]
 
     type t = private
       | Prop of prop
@@ -63,9 +65,9 @@ module Symbol = struct
     val to_string : t -> string
   end = struct
     type prop = string
-    [@@deriving sexp, eq]
+    [@@deriving sexp, eq, compare]
     type obj = string
-    [@@deriving sexp, eq]
+    [@@deriving sexp, eq, compare]
 
     let prop_to_string : prop -> string = Fun.id
     let obj_to_string : prop -> string = Fun.id
@@ -103,7 +105,7 @@ module Expression = struct
     type elementary =
       | Definite of S.prop
       | Prop of S.Var.prop * S.Var.obj list
-    [@@deriving sexp, eq]
+    [@@deriving sexp, eq, compare]
 
     let elementary_to_string = function
       | Definite v -> S.prop_to_string v
@@ -117,7 +119,7 @@ module Expression = struct
     type t =
       | Elem of elementary
       | Comp of compound
-    [@@deriving sexp, eq]
+    [@@deriving sexp, eq, compare]
     and compound =
       | Not of t
       | And of t * t
@@ -223,7 +225,31 @@ module Figure = struct
      expression. *)
   open Expression
 
-  (** The formula which compose a derivation so defined are called {i
+  module Rule = struct
+    type mode =
+      | Intro
+      | Elim
+    [@@deriving sexp, compare, show]
+
+    type dir =
+      | Left
+      | Right
+    [@@deriving sexp, compare, show]
+
+    type t =
+      { op: Symbol.logic
+      ; mode: mode
+      ; dir: dir option
+      }
+    [@@deriving sexp, compare, show, fields]
+
+    let to_string = show
+
+    let make ~op ~mode ?dir () = Fields.create ~op ~mode ~dir
+  end
+
+  (* TODO
+     "The formula which compose a derivation so defined are called {i
       D-formulae} (i.e., derivation formulae). By this we wish to indicate that
       we are not considering merely the formula as such, but also its position
       in the derivation.
@@ -231,16 +257,24 @@ module Figure = struct
       Thus by 'A is the {i same} {i D}-formula as B' we mean that A and B are
       not only formally identical, but occur also in the same place in the
       derivation. We shall use the words 'formally identical' to indicate
-      identity of form  regardless of place. *)
-  type upper = Formula.t list
-  type lower = Formula.t
-  type endformula = lower
+      identity of form  regardless of place." (73) *)
+
+  type endformula = Formula.t
+
 
   type t =
+    (* TODO Need to track when assumptions are discharged *)
     | Initial of Formula.t
     (** "The initial formulae of a derivation are {i assumption formulae}"*)
-    | Deriv of t list * Formula.t
+    | Deriv of deriv
     (** "A {i proof figure}, called a {i derivation} for short..." (72) *)
+  [@@deriving sexp, compare]
+  and deriv =
+    { upper: t list
+    ; lower: Formula.t
+    ; rule: Rule.t
+    }
+  [@@deriving sexp, compare, fields]
 
 
   (** "A {i path} in a derivation is a sequence of {i D}-formula whose first
@@ -249,22 +283,32 @@ module Figure = struct
       {i D}-inference figure whose lower formula is the next formula in the
       path." *)
 
-  (* let path TODO ?*)
+  (* TODO *)
+  let rec to_string : t -> string =
+    function
+    | Initial f ->
+      Formula.to_string f
+      |> Printf.sprintf "[%s]"
+    | Deriv {upper; lower; rule} ->
+      let figs_str = List.map ~f:to_string upper |> String.concat ~sep:"," in
+      let rule = Rule.to_string rule in
+      Printf.sprintf "%s |- %s [%s]" figs_str (Formula.to_string lower) rule
 
+  (* let path TODO ?*)
   let endformula : t -> Formula.t = function
     | Initial c -> c
-    | Deriv (_, c) -> c
+    | Deriv {lower; _} -> lower
 
   let initial f = Initial f
-  let deriv derivs conclusion = Deriv (derivs, conclusion)
+  let assume p = Initial p
+  let deriv upper lower ~rule =
+    Deriv (Fields_of_deriv.create ~upper ~lower ~rule)
 
   let rec initial_formulae : t -> Formula.t list = function
     | Initial c -> [c]
-    | Deriv (d, _) ->
-      List.map ~f:initial_formulae d
+    | Deriv {upper; _} ->
+      List.map ~f:initial_formulae upper
       |> ListLabels.flatten
-
-  let assume p = Initial p
 
   (* let ex =
    *   let a = Formula.prop "A"

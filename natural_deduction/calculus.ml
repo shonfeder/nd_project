@@ -14,42 +14,43 @@ module Intro = struct
   open Figure
   open Expression
 
+  open Option.Let_syntax
+
   let conj : t -> t -> t option =
     fun a_fig b_fig ->
     let a = endformula a_fig
     and b = endformula b_fig
     in
-    let open Formula.Infix
-    in Option.some @@
-    deriv
+    let open Formula.Infix in
+    let rule = Rule.(make ~op:Symbol.And ~mode:Intro ()) in
+    Option.some @@ deriv
       [a_fig; b_fig]
-      (************)
+      (************) ~rule
       (a && b)
 
   let disj_right : t -> Formula.t -> t option =
     fun a_fig b ->
     let a = endformula a_fig in
-    let open Formula.Infix
-    in Option.some @@
-    deriv
+    let open Formula.Infix in
+    let rule = Rule.(make ~op:Symbol.Or ~mode:Intro ~dir:Right ()) in
+    Option.some @@ deriv
       [a_fig]
-      (******)
+      (******) ~rule
       (a || b)
 
   let disj_left : Formula.t -> t -> t option =
     fun a b_fig ->
     let b = endformula b_fig in
-    let open Formula.Infix
-    in Option.some @@
-    deriv
+    let open Formula.Infix in
+    let rule = Rule.(make ~op:Symbol.Or ~mode:Intro ~dir:Left ()) in
+    Option.some @@ deriv
       [b_fig]
-      (******)
+      (******) ~rule
       (a || b)
 
-  (* "An arbitrary number (possibly zero) of formulae of this form, all formally
-      identical, may be adjoined to the inference figure as assumption formula."
-      (76) *)
-
+  (** "An arbitrary number (possibly zero) of formulae of this form, all
+      formally identical, may be adjoined to the inference figure as assumption
+      formula." (76) *)
   let assumption_formula : t -> Formula.t option =
     fun fig ->
     match Figure.initial_formulae fig with
@@ -64,29 +65,28 @@ module Intro = struct
   (* TODO Tests *)
   let imp : Formula.t -> t -> t option =
     fun ass fig ->
-    let open Option.Monad_infix in
-    assumption_formula fig >>= fun antecedent ->
+    let%bind antecedent = assumption_formula fig in
     if not (Formula.equal ass antecedent) then
       None
     else
       let consequent = Figure.endformula fig in
-      let open Formula.Infix
-      in Option.some @@
-      deriv
+      let open Formula.Infix in
+      let rule = Rule.(make ~op:Symbol.Imp ~mode:Intro ()) in
+      Option.some @@ deriv
         [fig]
-        (************************)
+        (************************) ~rule
         (antecedent => consequent)
 
   let neg : Formula.t -> t -> t option =
     fun f fig ->
-    let open Option.Monad_infix in
     let open Formula.Infix in
-    imp f fig >>= fun _implies_false ->
+    let%bind _implies_false = imp f fig in
     let conclusion = Figure.endformula fig in
+    let rule = Rule.(make ~op:Symbol.Not ~mode:Intro ()) in
     Option.some_if Formula.(equal (def F) conclusion) begin
       deriv
         [fig]
-        (****)
+        (****) ~rule
         (!! f)
     end
 end
@@ -94,63 +94,64 @@ end
 module Elim = struct
   open Figure
   open Expression
+  open Option.Let_syntax
 
   let conj_left : t -> t option =
     fun fig ->
-    let open Option.Monad_infix in
-    Figure.endformula fig |> Formula.get_and >>| fun (a, _) ->
+    let%map (a, _) = Figure.endformula fig |> Formula.get_and in
+    let rule = Rule.(make ~op:Symbol.And ~mode:Elim ~dir:Left ()) in
     deriv
       [fig]
-      (***)
+      (***) ~rule
       a
 
   let conj_right : t -> t option =
     fun fig ->
-    let open Option.Monad_infix in
-    Figure.endformula fig |> Formula.get_and >>| fun (_, b) ->
+    let%map (_, b) = Figure.endformula fig |> Formula.get_and  in
+    let rule = Rule.(make ~op:Symbol.And ~mode:Elim ~dir:Right ()) in
     deriv
       [fig]
-      (***)
+      (***) ~rule
       b
 
   let disj : t -> t -> t -> t option =
     fun a_or_b_fig c_from_a_fig c_from_b_fig ->
-    let open Option.Monad_infix in
-    Figure.endformula a_or_b_fig |> Formula.get_or >>= fun (a, b) ->
+    let%bind (a, b) = Figure.endformula a_or_b_fig |> Formula.get_or in
     let c_from_a = Figure.endformula c_from_a_fig
     and c_from_b = Figure.endformula c_from_b_fig
     in
-    Option.some_if Formula.(equal c_from_a c_from_b) c_from_a >>= fun c ->
-    Intro.imp a c_from_a_fig >>= fun _ ->
-    Intro.imp b c_from_b_fig >>| fun _ ->
+    let%bind c = Option.some_if Formula.(equal c_from_a c_from_b) c_from_a in
+    let%bind _a_implies_c = Intro.imp a c_from_a_fig in
+    let%map  _b_implies_c = Intro.imp b c_from_b_fig in
+    let rule = Rule.(make ~op:Symbol.Or ~mode:Elim ()) in
     deriv
       [a_or_b_fig; c_from_a_fig; c_from_a_fig]
-      (**************************************)
+      (**************************************) ~rule
       c
 
   let imp : t -> t -> t option =
     fun a_fig a_imp_b_fig ->
-    let open Option.Monad_infix in
-    Figure.endformula a_imp_b_fig |> Formula.get_imp >>= fun (a, b) ->
+    let%bind (a, b) = Figure.endformula a_imp_b_fig |> Formula.get_imp in
     let a' = Figure.endformula a_fig in
     Option.some_if Formula.(equal a a') begin
+      let rule = Rule.(make ~op:Symbol.Imp ~mode:Elim ()) in
       deriv
         [a_fig; a_imp_b_fig]
-        (******************)
+        (******************) ~rule
         b
     end
 
   let neg : t -> t -> t option =
     fun a_fig neg_a_fig ->
-    let open Option.Monad_infix in
     let a = Figure.endformula a_fig
     and neg_a = Figure.endformula neg_a_fig
     in
-    Formula.get_not neg_a >>= fun a' ->
+    let%bind a' = Formula.get_not neg_a in
     Option.some_if Formula.(equal a a') begin
+      let rule = Rule.(make ~op:Symbol.Not ~mode:Elim ()) in
       deriv
         [a_fig; neg_a_fig]
-        (****************)
+        (****************) ~rule
         Formula.(def F)
     end
 
@@ -158,9 +159,10 @@ module Elim = struct
     fun false_fig d ->
     let f = Figure.endformula false_fig in
     Option.some_if Formula.(equal (def F) f) begin
+      let rule = Rule.(make ~op:Symbol.Explode ~mode:Elim ()) in
       deriv
         [false_fig]
-        (*********)
+        (*********) ~rule
         d
     end
 end

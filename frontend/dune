@@ -1,7 +1,7 @@
 (executable
  (public_name frontend)
  (name main)
- (libraries core_kernel js_of_ocaml incr_dom)
+ (libraries natural_deduction core_kernel js_of_ocaml incr_dom)
  (preprocess
   (pps js_of_ocaml-ppx ppx_jane)))
 
