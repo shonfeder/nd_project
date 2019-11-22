@@ -54,6 +54,18 @@ body {
     font-size: .7em;
 }
 
+.rule > .hole {
+    display: inline-block;
+    border-bottom-style: dotted;
+    border-bottom-width: 1px;
+    width: 1.5em;
+    margin-left: .2em;
+    border-bottom-color: #555555;
+}
+
+.proof-hole {
+    color: #555555;
+}
 /***********/
 /* FORMULA */
 /***********/
@@ -77,8 +89,8 @@ body {
     border-right-width: .1em;
 }
 .operator {
-    margin-left: 5px;
-    margin-right: 5px;
+    margin-left: .2em;
+    margin-right: .2em;
     /* font-size: 1.2em; */
 }
 
