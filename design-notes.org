@@ -47,7 +47,6 @@ Selecting the terminal symbol of a compound formula sprouts a twig. E.g. the
 following results from selecting the terminal =∧=:
  
   #+BEGIN_SRC
-
   ⋮  ⋮
   A   B
   ————— ∧I
@@ -99,10 +98,9 @@ Sending down roots corresponds to elimination rules.
 
 *** Conjunction introduction
 
-Given the following partial
-proof, the user must find a way of "thickening" the twig. This can only be done
-by showing how the consequent of the conclusion formula can be derived from the
-posited assumption:
+Given the following partial proof, the user must find a way of "thickening" the
+twig. This can only be done by showing how the consequent of the conclusion
+formula can be derived from the posited assumption:
 
 #+BEGIN_SRC
   |A ∧ B|
@@ -152,11 +150,9 @@ selecting the terminal symbol of the assumption formula), it duplicates the
 assumption and "bifurcates" the twig:
 
 #+BEGIN_SRC
-|A ∧ A → B|   |A ∧ A → B|
+|A ∧ A → B|   |A ∧ A → B|      {"iter"}
       ⋮             ⋮
 —————————————————————————— _
-            ⋮
-       ——————————— _
             B
      ——————————————— →I
      (A ∧ A → B) → B
@@ -274,6 +270,7 @@ a contradiction.
 - Negations are refutations
 
 * Tasks
+** TODO Implement structure for partial proofs
 ** TODO Name
 - ND Project
 - Deduction + Education

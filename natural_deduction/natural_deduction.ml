@@ -9,3 +9,4 @@ close as possible to actual reasoning.|}
 
 module Notation = Notation
 module Calculus = Calculus
+module Proving = Proving

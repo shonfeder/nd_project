@@ -261,9 +261,8 @@ module Figure = struct
 
   type endformula = Formula.t
 
-
   type t =
-    (* TODO Need to track when assumptions are discharged *)
+    (* TODO Need to track when assumptions are discharged? *)
     | Initial of Formula.t
     (** "The initial formulae of a derivation are {i assumption formulae}"*)
     | Deriv of deriv
