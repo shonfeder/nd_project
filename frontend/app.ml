@@ -48,6 +48,8 @@ let apply_action model action _ ~schedule_action:_ =
 let on_startup ~schedule_action:_ _ = Async_kernel.return ()
 
 let view (m : Model.t Incr.t) ~inject =
+  (* TODO This is quite bad, no? *)
+  let module View = View.Make (struct let inject = inject end) in
   let open Incr.Let_syntax in
   let open Vdom in
   let button label action =
