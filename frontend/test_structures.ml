@@ -26,10 +26,11 @@ let derivation =
 
 module Partial = struct
   open Notation.Expression
-  open Proving.Partial
+  open Proof
 
   let a_prop = Formula.prop "A"
   let b_prop = Formula.prop "B"
+
 
   let ex =
     (* ⋮    ⋮
@@ -37,30 +38,29 @@ module Partial = struct
      * ————— ∧I
      * A ∧ B *)
     let a =
-      Partial { upper = None
-              ; lower = Lower.formula a_prop
-              ; rule  = Rule.hole
-              }
+      Figure.deriv
+        []
+        (Partial.Formula.complete a_prop)
+        ~rule:Partial.Rule.hole
     in
-    let b =
-      Partial { upper = None
-              ; lower = Lower.formula b_prop
-              ; rule  = Rule.hole
-              }
+    let b  =
+      Figure.deriv
+        []
+        (Partial.Formula.complete b_prop)
+        ~rule:Partial.Rule.hole
     in
-    Partial { upper = Some [a; b]
-            ; lower = Lower.formula Formula.Infix.(a_prop && b_prop)
-            ; rule  = Rule.rule Figure.Rule.(make ~op:Symbol.And ~mode:Intro ())
-            }
+    Figure.{ upper = [a; b]
+           ; lower = Partial.Formula.complete Formula.Infix.(a_prop && b_prop)
+           ; rule  = Partial.Rule.complete Figure.Rule.(make ~op:Symbol.And ~mode:Intro ())
+           }
 
   let ex2 =
     (*     ⋮
      * ————————— ∨I_
      *   A ∨ B *)
-    Partial { upper = None
-            ; lower = Lower.formula Formula.Infix.(a_prop || b_prop)
-            ; rule  = Rule.partial Figure.Rule.(make ~op:Symbol.Or ~mode:Intro ())
-            }
+    Figure.deriv []
+      (Partial.Formula.complete Formula.Infix.(a_prop || b_prop))
+      ~rule:(Partial.Rule.promised Figure.Rule.(make ~op:Symbol.Or ~mode:Intro ()))
 
   let ex3 =
     (*  |A|
@@ -68,17 +68,17 @@ module Partial = struct
      *   B
      * ————— →I
      * A → B *)
-    let assum = Complete (Figure.assume a_prop) in
+    let assum = (Figure.assume (Partial.Formula.complete a_prop)) in
     let deriv_b =
-      Partial { upper = Some [assum]
-              ; lower = Lower.formula b_prop
-              ; rule  = Rule.hole
-              }
+      Figure.deriv
+        [assum]
+        (Partial.Formula.complete b_prop)
+        ~rule:Partial.Rule.hole
     in
-    Partial { upper = Some [deriv_b]
-            ; lower = Lower.formula Formula.Infix.(a_prop => b_prop)
-            ; rule = Rule.rule (Figure.Rule.(make ~op:Symbol.Imp ~mode:Intro ()))
-            }
+    Figure.deriv
+      [deriv_b]
+      (Partial.Formula.complete Formula.Infix.(a_prop => b_prop))
+      ~rule:Partial.Rule.(complete (Figure.Rule.(make ~op:Symbol.Imp ~mode:Intro ())))
 
   let a_and_a_imp_b_prop = Formula.Infix.(a_prop && (a_prop => b_prop))
 
@@ -89,17 +89,17 @@ module Partial = struct
      *       B
      * ——————————————— →I
      * (A ∧ A → B) → B *)
-    let assum = Complete (Figure.assume a_and_a_imp_b_prop) in
+    let assum = Figure.assume Partial.Formula.(complete a_and_a_imp_b_prop) in
     let upper =
-      Partial { upper = Some [assum]
-              ; lower = Lower.formula b_prop
-              ; rule  = Rule.hole
-              }
+      Figure.deriv
+        [assum]
+        (Partial.Formula.complete b_prop)
+        ~rule:Partial.Rule.hole
     in
-    Partial { upper = Some [upper]
-            ; lower = Lower.formula a_and_a_imp_b_prop
-            ; rule  = Rule.rule (Figure.Rule.(make ~op:Symbol.Imp ~mode:Intro ()))
-            }
+    Figure.deriv
+      [upper]
+      (Partial.Formula.complete a_and_a_imp_b_prop)
+      ~rule:(Partial.Rule.complete (Figure.Rule.(make ~op:Symbol.Imp ~mode:Intro ())))
 
   let ex5 =
     (* |A ∧ A → B|   |A ∧ A → B|
@@ -108,20 +108,21 @@ module Partial = struct
      *             B
      *      ——————————————— →I
      *      (A ∧ A → B) → B *)
-    let assum = Complete (Figure.assume a_and_a_imp_b_prop) in
+    let assum = (Figure.assume (Partial.Formula.complete a_and_a_imp_b_prop)) in
     let deriv_from_assum =
-      Partial { upper = Some [assum]
-              ; lower = Lower.hole
-              ; rule  = Rule.hole
-              }
+      Figure.deriv
+        [assum]
+        Partial.Formula.hole
+        ~rule:Partial.Rule.hole
     in
     let deriv_of_b =
-      Partial { upper = Some [deriv_from_assum; deriv_from_assum]
-              ; lower = Lower.formula b_prop
-              ; rule  = Rule.hole
-              }
+      Figure.deriv
+        [deriv_from_assum; deriv_from_assum]
+        (Partial.Formula.complete b_prop)
+        ~rule:(Partial.Rule.hole)
     in
-    Partial { upper = Some [deriv_of_b]
-            ; lower = Lower.formula Formula.Infix.(a_and_a_imp_b_prop => b_prop)
-            ; rule  = Rule.rule (Figure.Rule.(make ~op:Symbol.Imp ~mode:Intro ()))}
+    Figure.deriv
+      [deriv_of_b]
+      (Partial.Formula.complete Formula.Infix.(a_and_a_imp_b_prop => b_prop))
+      ~rule:(Partial.Rule.complete (Figure.Rule.(make ~op:Symbol.Imp ~mode:Intro ())))
 end

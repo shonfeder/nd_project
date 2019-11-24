@@ -9,13 +9,12 @@ module Model = struct
     { counter : int
     ; input_text : string
     ; submitted_text : string option
-    ; derivation : Notation.Figure.t
-    ; partial_derivation : Proving.Partial.t
+    ; derivation : Proof.Complete.t
+    ; partial_derivation : Proof.Partial.t
     }
   [@@deriving sexp, fields, compare]
 
   (* TODO *)
-
   let set_default_input counter submitted_text =
     { counter
     ; input_text = sprintf "Default #%d" counter

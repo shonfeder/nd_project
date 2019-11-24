@@ -31,6 +31,10 @@ module Make (I : sig val inject: Action.t -> Vdom.Event.t end) = struct
 
     let proof_div ?(classes=[]) content =
       _div "proof" classes content
+
+    let assumption_div ?(classes=[]) content =
+      _div "assumption" classes content
+
   end
 
   module Derivation = struct
@@ -103,14 +107,14 @@ module Make (I : sig val inject: Action.t -> Vdom.Event.t end) = struct
       fun Figure.Rule.{op; mode; dir} -> [view_op op; view_mode mode; view_dir dir]
 
     let view_assumption : Formula.t -> Node.t = fun ass ->
-      Node.div [Attr.class_ "assumption"] [formula ass]
+      DerivNode.assumption_div [formula ass]
 
     (* TODO This is incorrectly wrapping assumptions as proofs *)
-    let view : Figure.t -> Node.t = fun d ->
-      let rec figure : Figure.t -> Node.t =
+    let view : Proof.Complete.t -> Node.t = fun d ->
+      let rec figure : Proof.Complete.t -> Node.t =
         function | Initial ass -> view_assumption ass
                  | Deriv d     -> deriv d
-      and deriv : Figure.deriv -> Node.t =
+      and deriv : _ Figure.deriv -> Node.t =
         fun {upper; lower; rule} ->
           DerivNode.derivation_div
             [ DerivNode.inference_div
@@ -123,35 +127,40 @@ module Make (I : sig val inject: Action.t -> Vdom.Event.t end) = struct
 
   module Partial_derivation = struct
     open Vdom
-    open Proving
+    open Proof
 
     let proof_hole_span = Node.span [Attr.classes ["hole"; "proof-hole"]] [Node.text "⋮"]
     let rule_hole_span  = Node.span [Attr.classes ["hole"; "rule-hole"]] []
 
-    let view_lower : Partial.Lower.t -> Node.t = function
-      | Formula f  -> DerivNode.lower_div [Derivation.formula f]
-      | Holder str -> DerivNode.lower_div ~classes:["holder"] [Node.text str]
-      | Hole       -> DerivNode.lower_div ~classes:["hole"] [proof_hole_span]
+    let view_initial : Partial.Formula.t -> Node.t = function
+      | Complete f   -> Derivation.view_assumption f
+      | Promised str -> DerivNode.assumption_div ~classes:["promised"] [Node.text str]
+      | Hole         -> DerivNode.assumption_div ~classes:["hole"] [proof_hole_span]
+
+    let view_formula : Partial.Formula.t -> Node.t = function
+      | Complete f   -> DerivNode.lower_div [Derivation.formula f]
+      | Promised str -> DerivNode.lower_div ~classes:["promissed"] [Node.text str]
+      | Hole         -> DerivNode.lower_div ~classes:["hole"] [proof_hole_span]
 
     let view_rule : Partial.Rule.t -> Node.t = function
-      | Rule r    -> DerivNode.rule_div (Derivation.rule_content r)
-      | Partial r -> DerivNode.rule_div ~classes:["partial"] (Derivation.rule_content r)
-      | Hole      -> DerivNode.rule_div ~classes:["hole"] [rule_hole_span]
+      | Complete r -> DerivNode.rule_div (Derivation.rule_content r)
+      | Promised r -> DerivNode.rule_div ~classes:["promised"] (Derivation.rule_content r)
+      | Hole       -> DerivNode.rule_div ~classes:["hole"] [rule_hole_span]
 
     let view : Partial.t -> Node.t = fun t ->
       let rec figure : Partial.t -> Node.t = function
-        | Complete f -> Derivation.view f
-        | Partial d -> deriv d
+        | Initial f -> view_initial f
+        | Deriv d -> deriv d
       and deriv : Partial.deriv -> Node.t =
         fun {upper; lower; rule} ->
           DerivNode.derivation_div ~classes:["partial"]
             [ DerivNode.inference_div ~classes:["partial"]
                 [ view_upper upper
-                ; view_lower lower ]
+                ; view_formula lower ]
             ; view_rule rule ]
-      and view_upper : Partial.t list option -> Node.t = function
-        | None       -> DerivNode.upper_div ~classes:["hole"] [proof_hole_span]
-        | Some upper -> DerivNode.upper_div (List.map ~f:figure upper)
+      and view_upper : Partial.t list -> Node.t = function
+        | []       -> DerivNode.upper_div ~classes:["hole"] [proof_hole_span]
+        | upper -> DerivNode.upper_div (List.map ~f:figure upper)
       in
       DerivNode.proof_div ~classes:["partial"] [figure t]
   end

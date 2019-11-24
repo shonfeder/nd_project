@@ -259,19 +259,17 @@ module Figure = struct
       derivation. We shall use the words 'formally identical' to indicate
       identity of form  regardless of place." (73) *)
 
-  type endformula = Formula.t
-
-  type t =
+  type ('formula, 'rule) t =
     (* TODO Need to track when assumptions are discharged? *)
-    | Initial of Formula.t
+    | Initial of 'formula
     (** "The initial formulae of a derivation are {i assumption formulae}"*)
-    | Deriv of deriv
+    | Deriv of ('formula, 'rule) deriv
     (** "A {i proof figure}, called a {i derivation} for short..." (72) *)
   [@@deriving sexp, compare]
-  and deriv =
-    { upper: t list
-    ; lower: Formula.t
-    ; rule: Rule.t
+  and ('formula, 'rule) deriv =
+    { upper: ('formula, 'rule) t list
+    ; lower: 'formula
+    ; rule: 'rule
     }
   [@@deriving sexp, compare, fields]
 
@@ -283,18 +281,19 @@ module Figure = struct
       path." *)
 
   (* TODO *)
-  let rec to_string : t -> string =
-    function
-    | Initial f ->
-      Formula.to_string f
-      |> Printf.sprintf "[%s]"
-    | Deriv {upper; lower; rule} ->
-      let figs_str = List.map ~f:to_string upper |> String.concat ~sep:"," in
-      let rule = Rule.to_string rule in
-      Printf.sprintf "%s |- %s [%s]" figs_str (Formula.to_string lower) rule
+  let to_string
+    : formula:(Formula.t -> string) -> rule:(Rule.t -> string) -> ('formula, 'rule) t -> string =
+    fun ~formula ~rule t ->
+    let rec to_string' = function
+      | Initial f -> formula f |> Printf.sprintf "[%s]"
+      | Deriv d ->
+        let figs_str = List.map ~f:to_string' d.upper |> String.concat ~sep:"," in
+        Printf.sprintf "%s |- %s [%s]" figs_str (formula d.lower) (rule d.rule)
+    in
+    to_string' t
 
   (* let path TODO ?*)
-  let endformula : t -> Formula.t = function
+  let endformula : ('formula, _) t -> 'formula = function
     | Initial c -> c
     | Deriv {lower; _} -> lower
 
@@ -303,7 +302,7 @@ module Figure = struct
   let deriv upper lower ~rule =
     Deriv (Fields_of_deriv.create ~upper ~lower ~rule)
 
-  let rec initial_formulae : t -> Formula.t list = function
+  let rec initial_formulae : ('formula, _) t -> 'formula list = function
     | Initial c -> [c]
     | Deriv {upper; _} ->
       List.map ~f:initial_formulae upper

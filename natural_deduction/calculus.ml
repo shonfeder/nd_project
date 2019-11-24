@@ -10,13 +10,15 @@ propositions, but rather from {i assumptions} to which logical
 deductions are applied.|}
     (`Pg 75)
 
+type fig = Proof.Complete.t
+
 module Intro = struct
   open Figure
   open Expression
 
   open Option.Let_syntax
 
-  let conj : t -> t -> t option =
+  let conj : fig -> fig -> fig option =
     fun a_fig b_fig ->
     let a = endformula a_fig
     and b = endformula b_fig
@@ -28,7 +30,7 @@ module Intro = struct
       (************) ~rule
       (a && b)
 
-  let disj_right : t -> Formula.t -> t option =
+  let disj_right : fig -> Formula.t -> fig option =
     fun a_fig b ->
     let a = endformula a_fig in
     let open Formula.Infix in
@@ -38,7 +40,7 @@ module Intro = struct
       (******) ~rule
       (a || b)
 
-  let disj_left : Formula.t -> t -> t option =
+  let disj_left : Formula.t -> fig -> fig option =
     fun a b_fig ->
     let b = endformula b_fig in
     let open Formula.Infix in
@@ -51,7 +53,7 @@ module Intro = struct
   (** "An arbitrary number (possibly zero) of formulae of this form, all
       formally identical, may be adjoined to the inference figure as assumption
       formula." (76) *)
-  let assumption_formula : t -> Formula.t option =
+  let assumption_formula : fig -> Formula.t option =
     fun fig ->
     match Figure.initial_formulae fig with
     | [] -> None
@@ -63,7 +65,7 @@ module Intro = struct
       Option.some_if all_are_formally_identical assumption
 
   (* TODO Tests *)
-  let imp : Formula.t -> t -> t option =
+  let imp : Formula.t -> fig -> fig option =
     fun ass fig ->
     let%bind antecedent = assumption_formula fig in
     if not (Formula.equal ass antecedent) then
@@ -77,7 +79,7 @@ module Intro = struct
         (************************) ~rule
         (antecedent => consequent)
 
-  let neg : Formula.t -> t -> t option =
+  let neg : Formula.t -> fig -> fig option =
     fun f fig ->
     let open Formula.Infix in
     let%bind _implies_false = imp f fig in
@@ -96,7 +98,7 @@ module Elim = struct
   open Expression
   open Option.Let_syntax
 
-  let conj_left : t -> t option =
+  let conj_left : fig -> fig option =
     fun fig ->
     let%map (a, _) = Figure.endformula fig |> Formula.get_and in
     let rule = Rule.(make ~op:Symbol.And ~mode:Elim ~dir:Left ()) in
@@ -105,7 +107,7 @@ module Elim = struct
       (***) ~rule
       a
 
-  let conj_right : t -> t option =
+  let conj_right : fig -> fig option =
     fun fig ->
     let%map (_, b) = Figure.endformula fig |> Formula.get_and  in
     let rule = Rule.(make ~op:Symbol.And ~mode:Elim ~dir:Right ()) in
@@ -114,7 +116,7 @@ module Elim = struct
       (***) ~rule
       b
 
-  let disj : t -> t -> t -> t option =
+  let disj : fig -> fig -> fig -> fig option =
     fun a_or_b_fig c_from_a_fig c_from_b_fig ->
     let%bind (a, b) = Figure.endformula a_or_b_fig |> Formula.get_or in
     let c_from_a = Figure.endformula c_from_a_fig
@@ -129,7 +131,7 @@ module Elim = struct
       (**************************************) ~rule
       c
 
-  let imp : t -> t -> t option =
+  let imp : fig -> fig -> fig option =
     fun a_fig a_imp_b_fig ->
     let%bind (a, b) = Figure.endformula a_imp_b_fig |> Formula.get_imp in
     let a' = Figure.endformula a_fig in
@@ -141,7 +143,7 @@ module Elim = struct
         b
     end
 
-  let neg : t -> t -> t option =
+  let neg : fig -> fig -> fig option =
     fun a_fig neg_a_fig ->
     let a = Figure.endformula a_fig
     and neg_a = Figure.endformula neg_a_fig
@@ -155,7 +157,7 @@ module Elim = struct
         Formula.(def F)
     end
 
-  let absurd : t -> Formula.t -> t option =
+  let absurd : fig -> Formula.t -> fig option =
     fun false_fig d ->
     let f = Figure.endformula false_fig in
     Option.some_if Formula.(equal (def F) f) begin
