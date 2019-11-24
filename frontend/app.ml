@@ -32,17 +32,7 @@ module Model = struct
   let cutoff t1 t2 = compare t1 t2 = 0
 end
 
-module Action = struct
-  type t =
-    | Reset_counter
-    | Incr_counter
-    | Update_input of string
-    | Submit_input
-    (* | Deconstruct_formula of Notation.Expression.Formula.t *)
-  [@@deriving sexp]
-
-  let should_log _ = true
-end
+module Action = Action
 
 module State = struct
   type t = unit
