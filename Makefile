@@ -9,6 +9,10 @@ deps:
 build:
 	dune build @default
 
+.PHONY: watch
+watch:
+	dune build -w
+
 .PHONY: all
 all: deps build
 
