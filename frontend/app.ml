@@ -29,6 +29,9 @@ module Model = struct
   let incr_counter t = set_default_input (t.counter + 1) t.submitted_text
   let update_input t input_text = { t with input_text }
   let submit_input t = { t with submitted_text = Some t.input_text }
+  (* TODO *)
+  let sprout_twig t s = Jsoo.Firebug.console##log(s); t
+
   let cutoff t1 t2 = compare t1 t2 = 0
 end
 
@@ -44,6 +47,8 @@ let apply_action model action _ ~schedule_action:_ =
   | Incr_counter -> Model.incr_counter model
   | Update_input text -> Model.update_input model text
   | Submit_input -> Model.submit_input model
+  (* TODO *)
+  | Sprout_twig str -> Model.sprout_twig model str
 
 let on_startup ~schedule_action:_ _ = Async_kernel.return ()
 
