@@ -86,7 +86,9 @@ module Make (I : sig val inject: Action.t -> Vdom.Event.t end) = struct
 
     exception Invalid_rule
 
-    let rule_content : Figure.Rule.t -> Node.t list =
+    module Rule = Proof.Complete.Rule
+
+    let rule_content : Rule.t -> Node.t list =
       let view_op : Symbol.logic -> Node.t = function
         | And     -> conj_op
         | Or      -> disj_op
@@ -95,16 +97,16 @@ module Make (I : sig val inject: Action.t -> Vdom.Event.t end) = struct
         | Explode -> Node.text "absurd"
         | _       -> raise Invalid_rule
       in
-      let view_mode : Figure.Rule.mode -> Node.t = function
+      let view_mode : Rule.mode -> Node.t = function
         | Intro -> Node.span [Attr.class_ "mode"] [Node.text "I"]
         | Elim  -> Node.span [Attr.class_ "mode"] [Node.text "E"]
       in
-      let view_dir : Figure.Rule.dir option -> Node.t = function
+      let view_dir : Rule.dir option -> Node.t = function
         | None       -> Node.span [] []
         | Some Left  -> Node.span [Attr.class_ "direction"] [Node.text "L"]
         | Some Right -> Node.span [Attr.class_ "direction"] [Node.text "R"]
       in
-      fun Figure.Rule.{op; mode; dir} -> [view_op op; view_mode mode; view_dir dir]
+      fun Rule.{op; mode; dir} -> [view_op op; view_mode mode; view_dir dir]
 
     let view_assumption : Formula.t -> Node.t = fun ass ->
       DerivNode.assumption_div [formula ass]
@@ -159,7 +161,7 @@ module Make (I : sig val inject: Action.t -> Vdom.Event.t end) = struct
                 ; view_formula lower ]
             ; view_rule rule ]
       and view_upper : Partial.t list -> Node.t = function
-        | []       -> DerivNode.upper_div ~classes:["hole"] [proof_hole_span]
+        | []    -> DerivNode.upper_div ~classes:["hole"] [proof_hole_span]
         | upper -> DerivNode.upper_div (List.map ~f:figure upper)
       in
       DerivNode.proof_div ~classes:["partial"] [figure t]

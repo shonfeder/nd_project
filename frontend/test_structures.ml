@@ -51,7 +51,7 @@ module Partial = struct
     in
     Figure.{ upper = [a; b]
            ; lower = Partial.Formula.complete Formula.Infix.(a_prop && b_prop)
-           ; rule  = Partial.Rule.complete Figure.Rule.(make ~op:Symbol.And ~mode:Intro ())
+           ; rule  = Partial.Rule.complete Complete.Rule.(make ~op:Symbol.And ~mode:Intro ())
            }
 
   let ex2 =
@@ -60,7 +60,7 @@ module Partial = struct
      *   A ∨ B *)
     Figure.deriv []
       (Partial.Formula.complete Formula.Infix.(a_prop || b_prop))
-      ~rule:(Partial.Rule.promised Figure.Rule.(make ~op:Symbol.Or ~mode:Intro ()))
+      ~rule:(Partial.Rule.promised Complete.Rule.(make ~op:Symbol.Or ~mode:Intro ()))
 
   let ex3 =
     (*  |A|
@@ -78,7 +78,7 @@ module Partial = struct
     Figure.deriv
       [deriv_b]
       (Partial.Formula.complete Formula.Infix.(a_prop => b_prop))
-      ~rule:Partial.Rule.(complete (Figure.Rule.(make ~op:Symbol.Imp ~mode:Intro ())))
+      ~rule:Partial.Rule.(complete (Complete.Rule.(make ~op:Symbol.Imp ~mode:Intro ())))
 
   let a_and_a_imp_b_prop = Formula.Infix.(a_prop && (a_prop => b_prop))
 
@@ -99,7 +99,7 @@ module Partial = struct
     Figure.deriv
       [upper]
       (Partial.Formula.complete a_and_a_imp_b_prop)
-      ~rule:(Partial.Rule.complete (Figure.Rule.(make ~op:Symbol.Imp ~mode:Intro ())))
+      ~rule:(Partial.Rule.complete (Complete.Rule.(make ~op:Symbol.Imp ~mode:Intro ())))
 
   let ex5 =
     (* |A ∧ A → B|   |A ∧ A → B|
@@ -124,5 +124,5 @@ module Partial = struct
     Figure.deriv
       [deriv_of_b]
       (Partial.Formula.complete Formula.Infix.(a_and_a_imp_b_prop => b_prop))
-      ~rule:(Partial.Rule.complete (Figure.Rule.(make ~op:Symbol.Imp ~mode:Intro ())))
+      ~rule:(Partial.Rule.complete (Complete.Rule.(make ~op:Symbol.Imp ~mode:Intro ())))
 end

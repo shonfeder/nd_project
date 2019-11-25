@@ -6,7 +6,30 @@ module Complete = struct
   open Notation
   open Notation.Expression
 
-  type t = (Formula.t, Figure.Rule.t) Figure.t
+  module Rule = struct
+    type mode =
+      | Intro
+      | Elim
+    [@@deriving sexp, compare, show]
+
+    type dir =
+      | Left
+      | Right
+    [@@deriving sexp, compare, show]
+
+    type t =
+      { op: Symbol.logic
+      ; mode: mode
+      ; dir: dir option
+      }
+    [@@deriving sexp, compare, show, fields]
+
+    let to_string = show
+
+    let make ~op ~mode ?dir () = Fields.create ~op ~mode ~dir
+  end
+
+  type t = (Formula.t, Rule.t) Figure.t
   [@@deriving sexp, compare]
 end
 
@@ -28,15 +51,15 @@ module Partial = struct
 
   module Rule = struct
     type t =
-      | Complete of Figure.Rule.t (* A complete rule *)
-      | Promised of Figure.Rule.t (* A None dir is a place holder *)
+      | Complete of Complete.Rule.t (* A complete rule *)
+      | Promised of Complete.Rule.t (* A None dir is a place holder *)
       | Hole (* ⋮ *)
     [@@deriving sexp, compare]
 
     exception Promised_rule_with_dir
 
     let complete r = Complete r
-    let promised r = match Figure.Rule.(r.dir) with
+    let promised r = match Complete.Rule.(r.dir) with
       | None   -> Promised r
       | Some _ -> raise Promised_rule_with_dir
     let hole      = Hole

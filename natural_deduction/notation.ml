@@ -220,34 +220,6 @@ end
 module Figure = struct
   let ie = ie "finite sets of symbols" 70
 
-  (* NOTE The same definition of figure works for sequents, if we end up wanting
-     to handle those, we can just functorize the Figure module over an
-     expression. *)
-  open Expression
-
-  module Rule = struct
-    type mode =
-      | Intro
-      | Elim
-    [@@deriving sexp, compare, show]
-
-    type dir =
-      | Left
-      | Right
-    [@@deriving sexp, compare, show]
-
-    type t =
-      { op: Symbol.logic
-      ; mode: mode
-      ; dir: dir option
-      }
-    [@@deriving sexp, compare, show, fields]
-
-    let to_string = show
-
-    let make ~op ~mode ?dir () = Fields.create ~op ~mode ~dir
-  end
-
   (* TODO
      "The formula which compose a derivation so defined are called {i
       D-formulae} (i.e., derivation formulae). By this we wish to indicate that
