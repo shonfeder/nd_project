@@ -3,8 +3,8 @@ open Natural_deduction
 open Helpers
 
 let testable_formula =
-  let pp = Fmt.of_to_string Notation.Expression.Formula.to_string in
-  Alcotest.testable pp Notation.Expression.Formula.equal
+  let pp = Fmt.of_to_string Notation.Formula.to_string in
+  Alcotest.testable pp Notation.Formula.equal
 
 (** True when [deriv] is a derivations of [concludes] *)
 let test_deriv name ~concludes deriv =
@@ -14,7 +14,6 @@ let test_deriv name ~concludes deriv =
 let unit_tests =
   let open Calculus in
   let open Notation in
-  let open Expression in
   let open Option.Let_syntax
   in
   let a_prop = Formula.prop "A"

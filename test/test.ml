@@ -2,5 +2,5 @@ open! Core_kernel
 
 let () =
   Alcotest.run "Tests" [
-    Calculus.unit_tests
+    Calculus_test.unit_tests
   ];
