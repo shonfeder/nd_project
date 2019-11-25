@@ -168,20 +168,6 @@ module Expression = struct
       let (||) = or_
       let (=>) = imp
     end
-    (* [map_to_list ~elem ~comp t] is a list of the sub-expressions of t derived
-       by traversing the AST from the left and apply [elem] to each [elementary]
-       expression and [comp] to each compound expression
-       TODO Decide if needed/useful *)
-    (* let map_to_list : elem:(elementary -> 'a) -> comp:(compound -> 'a) -> t -> 'a list =
-     *   fun ~elem ~comp t ->
-     *   let rec map = function
-     *     | Elem e -> [elem e]
-     *     | Comp c -> comp c :: map_compound c
-     *   and map_compound = function
-     *     | Not t -> map t
-     *     | And (a, b) | Or (a, b) | Imp (a, b) -> map a @ map b
-     *   in
-     *   map t *)
 
     (** "The number of logical symbols occurring in a formula is called {i the degree
         of the formula}. (71)" *)
@@ -254,7 +240,7 @@ module Figure = struct
 
   (* TODO *)
   let to_string
-    : formula:(Formula.t -> string) -> rule:(Rule.t -> string) -> ('formula, 'rule) t -> string =
+    : formula:('formula -> string) -> rule:('rule -> string) -> ('formula, 'rule) t -> string =
     fun ~formula ~rule t ->
     let rec to_string' = function
       | Initial f -> formula f |> Printf.sprintf "[%s]"
@@ -264,7 +250,6 @@ module Figure = struct
     in
     to_string' t
 
-  (* let path TODO ?*)
   let endformula : ('formula, _) t -> 'formula = function
     | Initial c -> c
     | Deriv {lower; _} -> lower
@@ -279,18 +264,4 @@ module Figure = struct
     | Deriv {upper; _} ->
       List.map ~f:initial_formulae upper
       |> ListLabels.flatten
-
-  (* let ex =
-   *   let a = Formula.prop "A"
-   *   and b = Formula.prop "B"
-   *   in
-   *   Deriv ([Deriv ([Initial a; Initial b],
-   *                  Formula.and_ a b);       Initial b],
-   *          Formula.and_ (Formula.and_ a b) b) *)
-
-  (*   (\** 3.1 - 3.2 *\)
-   * type t =
-   *   | Infer of upper * lower
-   *   (\** "A {i proof figure}, called a {i derivation} for short..." (72) *\)
-   *   | Deriv of t list * endformula *)
 end
