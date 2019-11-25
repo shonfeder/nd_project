@@ -4,7 +4,6 @@ open Core_kernel
 
 module Complete = struct
   open Notation
-  open Notation.Expression
 
   module Rule = struct
     type mode =
@@ -24,6 +23,7 @@ module Complete = struct
       }
     [@@deriving sexp, compare, show, fields]
 
+    let equal a b = (compare a b = 0)
     let to_string = show
 
     let make ~op ~mode ?dir () = Fields.create ~op ~mode ~dir
@@ -35,7 +35,7 @@ end
 
 module Partial = struct
   open Notation
-  open Notation.Expression
+
 
   module Formula = struct
     type t =

@@ -41,7 +41,6 @@ module Make (I : sig val inject: Action.t -> Vdom.Event.t end) = struct
     (** Derivation nodes *)
     open Vdom
     open Notation
-    open Expression
 
     let elementary : Formula.elementary -> Node.t =
       let classes = ["prop"; "elementary"; "subformula"] in

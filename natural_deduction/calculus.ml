@@ -15,8 +15,6 @@ type fig = Proof.Complete.t
 module Intro = struct
   open Figure
   open Proof.Complete
-  open Expression
-
   open Option.Let_syntax
 
   let conj : fig -> fig -> fig option =
@@ -96,7 +94,6 @@ end
 
 module Elim = struct
   open Figure
-  open Expression
   open Proof.Complete
   open Option.Let_syntax
 

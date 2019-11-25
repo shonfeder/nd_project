@@ -6,10 +6,10 @@ open Notation
 
 let derivation =
   let open Option.Let_syntax in
-  let a = Expression.Formula.(not_ (prop "A"))
-  and b = Expression.Formula.prop "B" |> Figure.assume
-  and c = Expression.Formula.prop "C"
-  and d = (Expression.Formula.prop "D")
+  let a = Formula.(not_ (prop "A"))
+  and b = Formula.prop "B" |> Figure.assume
+  and c = Formula.prop "C"
+  and d = (Formula.prop "D")
   in
   let open Calculus in
   let deriv =
@@ -25,7 +25,7 @@ let derivation =
 
 
 module Partial = struct
-  open Notation.Expression
+
   open Proof
 
   let a_prop = Formula.prop "A"
