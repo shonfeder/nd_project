@@ -2,40 +2,40 @@ open Core_kernel
 open Incr_dom
 open Natural_deduction
 
+(* Node templates used in creating views. These should not know about any code
+   in [Naural_deduction] *)
+module DerivNode = struct
+  (* TODO refactor out all magic string classes into this module *)
+  open Vdom
+
+  let _div class_ classes content =
+    let classes = class_ :: classes in
+    Node.div [Attr.classes classes] content
+
+  let lower_div ?(classes=[]) content =
+    _div "lower" classes content
+
+  let upper_div ?(classes=[]) content =
+    _div "upper" classes content
+
+  let rule_div ?(classes=[]) content =
+    _div "rule" classes content
+
+  let inference_div ?(classes=[]) content =
+    _div "inference" classes content
+
+  let derivation_div ?(classes=[]) content =
+    _div "derivation" classes content
+
+  let proof_div ?(classes=[]) content =
+    _div "proof" classes content
+
+  let assumption_div ?(classes=[]) content =
+    _div "assumption" classes content
+end
+
+
 module Make (I : sig val inject: Action.t -> Vdom.Event.t end) = struct
-
-  (* Node templates used in creating views. These should not know about any code
-     in [Naural_deduction] *)
-  module DerivNode = struct
-    (* TODO refactor out all magic string classes into this module *)
-    open Vdom
-
-    let _div class_ classes content =
-      let classes = class_ :: classes in
-      Node.div [Attr.classes classes] content
-
-    let lower_div ?(classes=[]) content =
-      _div "lower" classes content
-
-    let upper_div ?(classes=[]) content =
-      _div "upper" classes content
-
-    let rule_div ?(classes=[]) content =
-      _div "rule" classes content
-
-    let inference_div ?(classes=[]) content =
-      _div "inference" classes content
-
-    let derivation_div ?(classes=[]) content =
-      _div "derivation" classes content
-
-    let proof_div ?(classes=[]) content =
-      _div "proof" classes content
-
-    let assumption_div ?(classes=[]) content =
-      _div "assumption" classes content
-
-  end
 
   module Derivation = struct
     (** Derivation nodes *)
