@@ -49,25 +49,30 @@ module Intro = struct
       (******) ~rule
       (a || b)
 
+  (* TODO Determine for sure whether this is needed *)
   (** "An arbitrary number (possibly zero) of formulae of this form, all
       formally identical, may be adjoined to the inference figure as assumption
       formula." (76) *)
-  let assumption_formula : fig -> Formula.t option =
-    fun fig ->
-    match Figure.initial_formulae fig with
-    | [] -> None
-    | assumption :: assumptions ->
-      let all_are_formally_identical =
-        let f bool a = bool && Formula.equal a assumption in
-        List.fold ~f ~init:true assumptions
-      in
-      Option.some_if all_are_formally_identical assumption
+  (* let assumption_formula : fig -> Formula.t option =
+   *   fun fig ->
+   *   match Figure.initial_formulae fig with
+   *   | [] -> None
+   *   | assumption :: assumptions ->
+   *     let all_are_formally_identical =
+   *       let f bool a = bool && Formula.equal a assumption in
+   *       List.fold ~f ~init:true assumptions
+   *     in
+   *     if all_are_formally_identical then
+   *       Some assumption
+   *     else
+   *       (print_endline "Failed at assumption formula";
+   *        None) *)
 
   (* TODO Tests *)
   let imp : Formula.t -> fig -> fig option =
-    fun ass fig ->
-    let%bind antecedent = assumption_formula fig in
-    if not (Formula.equal ass antecedent) then
+    fun antecedent fig ->
+    let assumptions = Figure.initial_formulae fig in
+    if not (List.mem assumptions antecedent ~equal:Formula.equal) then
       None
     else
       let consequent = Figure.endformula fig in
