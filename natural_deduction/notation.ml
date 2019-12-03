@@ -27,12 +27,23 @@ module Symbol = struct
     | And
     | Or
     | Imp
-    | Equiv
     | Not
+    | Equiv
     | All
     | Exists
     | Explode
   [@@deriving sexp, compare, show]
+
+  let logic_to_string = function
+    | And -> "∧"
+    | Or  -> "∨"
+    | Imp -> "→"
+    | Not -> "¬"
+    | Equiv -> "≡"
+    | All  -> "∀"
+    | Exists -> "∃"
+    | Explode -> "⊥"
+
 
   type const =
     | Object of int
@@ -241,8 +252,8 @@ module Figure = struct
     let rec to_string' = function
       | Initial f -> formula f |> Printf.sprintf "[%s]"
       | Deriv d ->
-        let figs_str = List.map ~f:to_string' d.upper |> String.concat ~sep:"," in
-        Printf.sprintf "%s |- %s [%s]" figs_str (formula d.lower) (rule d.rule)
+        let figs_str = List.map ~f:to_string' d.upper |> String.concat ~sep:", " in
+        Printf.sprintf "{%s |- %s <%s>}" figs_str (formula d.lower) (rule d.rule)
     in
     to_string' t
 

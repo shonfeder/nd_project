@@ -11,10 +11,18 @@ module Complete = struct
       | Elim
     [@@deriving sexp, compare, show]
 
+    let mode_to_string = function
+      | Intro -> "I"
+      | Elim  -> "E"
+
     type dir =
       | Left
       | Right
     [@@deriving sexp, compare, show]
+
+    let dir_to_string = function
+      | Left -> "L"
+      | Right -> "R"
 
     type t =
       { op: Symbol.logic
@@ -24,13 +32,21 @@ module Complete = struct
     [@@deriving sexp, compare, show, fields]
 
     let equal a b = (compare a b = 0)
-    let to_string = show
+    let to_string {op; mode; dir} =
+      let op = Symbol.logic_to_string op in
+      let mode = mode_to_string mode in
+      let dir = match dir with
+        | None   -> ""
+        | Some d -> "-" ^ dir_to_string d in
+      Printf.sprintf "%s%s%s" op mode dir
 
     let make ~op ~mode ?dir () = Fields.create ~op ~mode ~dir
   end
 
   type t = (Formula.t, Rule.t) Figure.t
   [@@deriving sexp, compare]
+
+  let to_string : t -> string = Figure.to_string ~formula:Formula.to_string ~rule:Rule.to_string
 end
 
 module Partial = struct
@@ -85,7 +101,12 @@ module Zipper = struct
     ; down: ('formula, 'rule) t list
     (** The derivations derivable from those on the current line *)
     }
-  [@@deriving compare, fields]
+  [@@deriving compare, fields, sexp]
+
+  type partial = (Partial.Formula.t, Partial.Rule.t) t
+  [@@deriving compare, sexp]
+  type complete = (Formula.t, Complete.Rule.t) t
+  [@@deriving compare, sexp]
 
   let make ?(left=[]) ?(right=[]) ?(down=[]) focus =
     Fields.create ~focus ~left ~right ~down
@@ -149,6 +170,7 @@ module Zipper = struct
     | []       -> None
     | (t :: _) -> Some t
 
+  let focus t = t.focus
   let peek_left t  = List.hd t.left
   let peek_right t = List.hd t.right
   let peek_down t  = List.hd t.down
