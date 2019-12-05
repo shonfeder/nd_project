@@ -1,5 +1,6 @@
 open Core_kernel
 open Incr_dom
+
 open Natural_deduction
 
 module Jsoo = Js_of_ocaml
@@ -28,8 +29,7 @@ module Model = struct
   let incr_counter t = set_default_input (t.counter + 1) t.submitted_text
   let update_input t input_text = { t with input_text }
   let submit_input t = { t with submitted_text = Some t.input_text }
-  (* TODO *)
-  let sprout_twig t s = Jsoo.Firebug.console##log(s); t
+  let grow_proof t s = Jsoo.Firebug.console##log s; t
 
   let cutoff t1 t2 = compare t1 t2 = 0
 end
@@ -47,7 +47,7 @@ let apply_action model action _ ~schedule_action:_ =
   | Update_input text -> Model.update_input model text
   | Submit_input -> Model.submit_input model
   (* TODO *)
-  | Sprout_twig str -> Model.sprout_twig model str
+  | Grow_proof proof -> Model.grow_proof model proof
 
 let on_startup ~schedule_action:_ _ = Async_kernel.return ()
 
@@ -122,7 +122,10 @@ let view (m : Model.t Incr.t) ~inject =
     View.Derivation.view deriv
   and partial_derivation =
     let%map deriv = m >>| Model.partial_derivation in
-    View.Partial_derivation.view deriv
+    Node.div [] [
+      View.Derivation_zipper.view deriv;
+      (* View.Partial_derivation.view deriv *)
+    ]
   in
   Node.div [] [ submission; input; submit_button; reset_button; incr_button
               ; from_box; to_box

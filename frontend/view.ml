@@ -1,6 +1,9 @@
 open Core_kernel
 open Incr_dom
+
 open Natural_deduction
+
+module Jsoo = Js_of_ocaml
 
 (* Node templates used in creating views. These should not know about any code
    in [Naural_deduction] *)
@@ -8,39 +11,32 @@ module DerivNode = struct
   (* TODO refactor out all magic string classes into this module *)
   open Vdom
 
-  let _div class_ classes content =
+  let _div class_ ?(classes=[]) ?(attrs=[]) content =
     let classes = class_ :: classes in
-    Node.div [Attr.classes classes] content
+    Node.div (Attr.classes classes :: attrs) content
 
-  let lower_div ?(classes=[]) content =
-    _div "lower" classes content
-
-  let upper_div ?(classes=[]) content =
-    _div "upper" classes content
-
-  let rule_div ?(classes=[]) content =
-    _div "rule" classes content
-
-  let inference_div ?(classes=[]) content =
-    _div "inference" classes content
-
-  let derivation_div ?(classes=[]) content =
-    _div "derivation" classes content
-
-  let proof_div ?(classes=[]) content =
-    _div "proof" classes content
-
-  let assumption_div ?(classes=[]) content =
-    _div "assumption" classes content
+  let lower_div      = _div "lower"
+  let upper_div      = _div "upper"
+  let rule_div       = _div "rule"
+  let inference_div  = _div "inference"
+  let derivation_div = _div "derivation"
+  let proof_div      = _div "proof"
+  let assumption_div = _div "assumption"
 end
 
 
 module Make (I : sig val inject: Action.t -> Vdom.Event.t end) = struct
 
+  let sprout_on_click_attr zipper =
+    Vdom.Attr.on_click (fun _ev -> I.inject (Action.Grow_proof zipper))
+
   module Derivation = struct
     (** Derivation nodes *)
     open Vdom
     open Notation
+
+    (* TODO *)
+    let _ = I.inject
 
     let elementary : Formula.elementary -> Node.t =
       let classes = ["prop"; "elementary"; "subformula"] in
@@ -48,8 +44,8 @@ module Make (I : sig val inject: Action.t -> Vdom.Event.t end) = struct
       | Definite F -> Node.span [Attr.classes ("falsum" :: classes)] [Node.text "⊥"]
       | Definite T -> Node.span [Attr.classes ("varum" :: classes)] [Node.text "⊤"]
       | Prop (v, args) ->
-        let prop_str = S.Var.prop_to_string v in
-        let args_str = args |> List.map ~f:S.Var.obj_to_string |> String.concat ~sep:"" in
+        let prop_str = Symbol.Var.prop_to_string v in
+        let args_str = args |> List.map ~f:Symbol.Var.obj_to_string |> String.concat ~sep:"" in
         Node.span [Attr.classes classes] [Node.text (prop_str ^ args_str)]
 
     let operator : name:string -> sign:string -> Node.t = fun ~name ~sign ->
@@ -60,7 +56,7 @@ module Make (I : sig val inject: Action.t -> Vdom.Event.t end) = struct
     let disj_op = operator ~name:"disjunction" ~sign:"∨"
     let imp_op  = operator ~name:"implication" ~sign:"→"
 
-    let formula : Formula.t -> Node.t = fun f ->
+    let formula : ?zipper:Proof.Zipper.partial -> Formula.t -> Node.t = fun ?zipper f ->
       let rec subformula f = match (f : Formula.t) with
         | Elem e -> elementary e
         | Comp c -> compound c
@@ -77,9 +73,10 @@ module Make (I : sig val inject: Action.t -> Vdom.Event.t end) = struct
           Node.span [Attr.classes (class_ :: classes)] content
       in
       let attrs =
-        [ Attr.classes ["formula"]
-        ; Attr.on_click (fun _ev -> I.inject (Action.Sprout_twig "blah"))
-        ]
+        let classes = [Attr.classes ["formula"]] in
+        match zipper with
+        | None   -> classes
+        | Some z -> sprout_on_click_attr z :: classes
       in
       Node.span attrs [subformula f]
 
@@ -107,10 +104,9 @@ module Make (I : sig val inject: Action.t -> Vdom.Event.t end) = struct
       in
       fun Rule.{op; mode; dir} -> [view_op op; view_mode mode; view_dir dir]
 
-    let view_assumption : Formula.t -> Node.t = fun ass ->
-      DerivNode.assumption_div [formula ass]
+    let view_assumption : ?attrs:(Attr.t list) -> Formula.t -> Node.t =
+      fun ?attrs ass -> DerivNode.assumption_div ?attrs [formula ass]
 
-    (* TODO This is incorrectly wrapping assumptions as proofs *)
     let view : Proof.Complete.t -> Node.t = fun d ->
       let rec figure : Proof.Complete.t -> Node.t =
         function | Initial ass -> view_assumption ass
@@ -133,15 +129,27 @@ module Make (I : sig val inject: Action.t -> Vdom.Event.t end) = struct
     let proof_hole_span = Node.span [Attr.classes ["hole"; "proof-hole"]] [Node.text "⋮"]
     let rule_hole_span  = Node.span [Attr.classes ["hole"; "rule-hole"]] []
 
-    let view_initial : Partial.Formula.t -> Node.t = function
-      | Complete f   -> Derivation.view_assumption f
-      | Promised str -> DerivNode.assumption_div ~classes:["promised"] [Node.text str]
-      | Hole         -> DerivNode.assumption_div ~classes:["hole"] [proof_hole_span]
+    let view_initial : ?zipper:Zipper.partial -> Partial.Formula.t -> Node.t =
+      fun ?zipper f ->
+      let attrs = match zipper with
+        | None -> []
+        | Some z -> [sprout_on_click_attr z]
+      in
+      match f with
+      | Complete f   -> Derivation.view_assumption ~attrs f
+      | Promised str -> DerivNode.assumption_div ~attrs ~classes:["promised"] [Node.text str]
+      | Hole         -> DerivNode.assumption_div ~attrs ~classes:["hole"] [proof_hole_span]
 
-    let view_formula : Partial.Formula.t -> Node.t = function
-      | Complete f   -> DerivNode.lower_div [Derivation.formula f]
-      | Promised str -> DerivNode.lower_div ~classes:["promissed"] [Node.text str]
-      | Hole         -> DerivNode.lower_div ~classes:["hole"] [proof_hole_span]
+    let view_formula : ?zipper:Zipper.partial -> Partial.Formula.t -> Node.t =
+      fun ?zipper f ->
+      let attrs = match zipper with
+        | None -> []
+        | Some z -> [sprout_on_click_attr z]
+      in
+      match f with
+      | Complete f   -> DerivNode.lower_div [Derivation.formula ?zipper f]
+      | Promised str -> DerivNode.lower_div ~attrs ~classes:["promissed"] [Node.text str]
+      | Hole         -> DerivNode.lower_div ~attrs ~classes:["hole"] [proof_hole_span]
 
     let view_rule : Partial.Rule.t -> Node.t = function
       | Complete r -> DerivNode.rule_div (Derivation.rule_content r)
@@ -164,5 +172,36 @@ module Make (I : sig val inject: Action.t -> Vdom.Event.t end) = struct
         | upper -> DerivNode.upper_div (List.map ~f:figure upper)
       in
       DerivNode.proof_div ~classes:["partial"] [figure t]
+  end
+
+  module Derivation_zipper = struct
+    open Vdom
+    open Proof
+    open Notation
+
+    let view : Partial.t -> Node.t = fun t ->
+      let zip = Zipper.of_figure t
+      in
+      let rec zipped_fig : Zipper.partial -> Node.t =
+        fun zipper -> match Zipper.focus zipper with
+          | Figure.Initial i -> Partial_derivation.view_initial ~zipper i
+          | Figure.Deriv {rule; lower; _} ->
+            DerivNode.derivation_div ~classes:["partial"]
+              [ DerivNode.inference_div ~classes:["partial"]
+                  [ zipped_upper (Zipper.move_up zipper)
+                  ; Partial_derivation.view_formula ~zipper lower ]
+              ; Partial_derivation.view_rule rule ]
+
+      and zipped_upper : Zipper.partial option -> Node.t =
+        fun z ->
+          let rec get_uppers z = match z with
+            | None -> []
+            | Some z -> z :: (get_uppers @@ Zipper.move_right z)
+          in
+          match get_uppers z with
+          | []     -> DerivNode.upper_div ~classes:["hole"] [Partial_derivation.proof_hole_span]
+          | uppers -> DerivNode.upper_div (List.map ~f:zipped_fig uppers)
+      in
+      DerivNode.proof_div ~classes:["partial"] [zipped_fig zip]
   end
 end
