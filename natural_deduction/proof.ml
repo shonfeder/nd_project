@@ -21,7 +21,7 @@ module Complete = struct
     [@@deriving sexp, compare, show]
 
     let dir_to_string = function
-      | Left -> "L"
+      | Left  -> "L"
       | Right -> "R"
 
     type t =
@@ -52,19 +52,6 @@ end
 module Partial = struct
   open Notation
 
-
-  module Formula = struct
-    type t =
-      | Complete of Formula.t
-      | Promised of string (* id for formulas which must the same *)
-      | Hole (* ⋮ *)
-    [@@deriving sexp, compare]
-
-    let complete f   = Complete f
-    let promised str = Promised str
-    let hole         = Hole
-  end
-
   module Rule = struct
     type t =
       | Complete of Complete.Rule.t (* A complete rule *)
@@ -79,6 +66,18 @@ module Partial = struct
       | None   -> Promised r
       | Some _ -> raise Promised_rule_with_dir
     let hole      = Hole
+  end
+
+  module Formula = struct
+    type t =
+      | Complete of Formula.t
+      | Promised of string (* id for formulas which must the same *)
+      | Hole (* ⋮ *)
+    [@@deriving sexp, compare]
+
+    let complete f   = Complete f
+    let promised str = Promised str
+    let hole         = Hole
   end
 
   type t = (Formula.t, Rule.t) Figure.t
@@ -141,11 +140,10 @@ module Zipper = struct
   let move_right ({left; focus; right; _} as t) =
     match right with
     | [] -> None
-    | (x :: xs) ->
-      Some {t with left  = focus :: left
-                 ; focus = x
-                 ; right = xs
-           }
+    | (x :: xs) -> Some {t with left  = focus :: left
+                              ; focus = x
+                              ; right = xs
+                        }
 
   (** Move the focus to the leftmost figure in the [upper] figures of the
       current derivation.
@@ -180,4 +178,56 @@ module Zipper = struct
     | Deriv d   -> Some (Figure.upper d)
 
   let peek_up t = Option.(peek_upper t >>= List.hd)
+
+  (* TODO let insert_up *)
+end
+
+module Tactic_t = struct
+  open Notation
+  type t =
+    | Intro_imp of {antecedent: Formula.t; consequent: Formula.t}
+
+  type 'a err =
+    [> `Initial
+    |  `Nonempty_upper
+    ] as 'a
+
+  type 'a application = Zipper.partial -> (Zipper.partial, 'a err) Result.t
+end
+
+module Tactic : sig
+  include module type of Tactic_t
+
+  open Notation
+
+  val intro_imp: antecedent:Formula.t -> consequent:Formula.t -> _ application
+end = struct
+  open Notation
+  include Tactic_t
+
+  let intro_imp ~antecedent ~consequent z =
+    match Zipper.peek_upper z with
+    | None -> Error `Initial
+    | Some (_::_) -> Error `Nonempty_upper
+    | Some [] -> Ok z
+    (* TODO Insert antecedent ... consequent partial into upper *)
+end
+
+module Grow : sig
+  val possible_tactics : Zipper.partial -> Tactic.t list option
+  val using_tactic : Zipper.partial -> Tactic.t -> Zipper.partial option
+end = struct
+  open Notation
+
+  let compound_tactics : Formula.compound -> Tactic.t list option = function
+    | Imp (antecedent, consequent) -> Some [Intro_imp {antecedent; consequent}]
+    | _ -> raise (Failure "TODO")
+
+  let possible_tactics z =
+    match (Zipper.focus z |> Figure.endformula : Partial.Formula.t) with
+    | Complete (Comp cmp) -> compound_tactics cmp
+    | _ -> raise (Failure "TODO")
+
+  let using_tactic z tac = match (tac : Tactic.t) with
+    | Intro_imp {antecedent; consequent} ->
 end
