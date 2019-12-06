@@ -32,3 +32,6 @@ https://www.microsoft.com/en-us/p/naturaldeduction/9ndb7hz5pfm0?activetab=pivot:
 - Linear presentation rather than tree based
 - Does not appear to include instructional material or design elements
 
+** TODO  PANDA
+https://sciences.ucf.edu/math/wp-content/uploads/sites/43/2014/10/Tools-for-Teaching-Logic.pdf#page=95
+** TODO http://www.phil.cmu.edu/legacy/Proof_Site/files/CBT_Paper.pdf
