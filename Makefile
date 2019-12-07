@@ -20,9 +20,10 @@ all: deps build
 clean:
 	dune clean
 
-.PHONY: run
-run: build
-	dune exec nd_project
+.PHONY: view
+view: build
+	xdg-open _build/default/frontend/index.html
+	dune build {public/*,frontend/main.bc.js,frontend/index.html} -w
 
 .PHONY: test
 test:
