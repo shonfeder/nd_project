@@ -11,7 +11,7 @@ module Model = struct
     ; input_text : string
     ; submitted_text : string option
     ; derivation : Proof.Complete.t
-    ; partial_derivation : Proof.Partial.t
+    ; partial_derivation : Proof.Focused.t
     }
   [@@deriving sexp, fields, compare]
 
@@ -21,7 +21,7 @@ module Model = struct
     ; input_text = sprintf "Default #%d" counter
     ; submitted_text
     ; derivation = Test_structures.derivation
-    ; partial_derivation = Test_structures.Partial.ex5
+    ; partial_derivation = Proof.Focused.of_figure Test_structures.Partial.ex6
     }
 
   let init () = set_default_input 0 None
@@ -29,7 +29,13 @@ module Model = struct
   let incr_counter t = set_default_input (t.counter + 1) t.submitted_text
   let update_input t input_text = { t with input_text }
   let submit_input t = { t with submitted_text = Some t.input_text }
-  let grow_proof t s = Jsoo.Firebug.console##log s; t
+  let grow_proof t (proof : Proof.Focused.t) =
+    Jsoo.Firebug.console##log proof;
+    match Proof.Focused.explore_tactics proof with
+    | Error `None         -> t
+    | Error _err          -> raise (Failure "TODO Handle other user errors")
+    | Ok (`Options _)     -> raise (Failure "TODO Handle options")
+    | Ok (`Applied proof) -> { t with partial_derivation = proof }
 
   let cutoff t1 t2 = compare t1 t2 = 0
 end

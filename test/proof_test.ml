@@ -71,14 +71,50 @@ let zipper_unit_tests = Helpers.unit_suite "Proof Zipper Unit Tests"
         in
         let actual =
           Zipper.(of_figure ex_proof |>
-                  move_up >>= move_up >>=
+                  move_up    >>= move_up >>=
                   move_right >>=
-
-                  move_left >>=
-                  move_down >>= move_down >>|
+                  move_left  >>=
+                  move_down  >>= move_down >>|
                   focus)
         in
         Nd_unit.test_figure name ~expected ~actual
       end;
 
+      Nd_unit.test_figure "(to_figure % of_figure) is the identity on a figure"
+        ~expected:Ex_proofs.Ex_1_1.proof
+        ~actual:Option.(Ex_proofs.Ex_1_1.proof >>| Zipper.of_figure >>| Zipper.to_figure)
+      ;
+
+      Nd_unit.test_figure "moving around and converting to_figure is still identity on a figure"
+        ~expected:Ex_proofs.Ex_1_1.proof
+        ~actual:Option.(
+            Ex_proofs.Ex_1_1.proof
+            >>| Zipper.of_figure
+            >>= Zipper.move_up
+            >>= Zipper.move_up
+            >>= Zipper.move_right
+            >>| Zipper.to_figure
+          )
+      ;
+
+
+      Nd_unit.test_figure "mapping over the focused initial formula"
+        ~expected:(Option.some @@ Notation.Figure.Initial Ex_proofs.Prop.x)
+        ~actual:begin
+          Notation.Figure.Initial Ex_proofs.Prop.y
+          |> Zipper.of_figure
+          |> Zipper.map ~f:(Fn.const (Notation.Figure.Initial Ex_proofs.Prop.x))
+          |> Zipper.focus
+          |> Option.some
+        end;
+
+      Nd_unit.test_figure "mapping over the focused derived formula"
+        ~expected:(Option.some @@ Notation.Figure.Initial Ex_proofs.Prop.x)
+        ~actual:begin
+          let open Option.Let_syntax in
+          let%map p = Ex_proofs.Ex_1_1.proof in
+          Zipper.of_figure p
+          |> Zipper.map ~f:(Fun.const @@ Notation.Figure.Initial Ex_proofs.Prop.x)
+          |> Zipper.focus
+        end
     ]

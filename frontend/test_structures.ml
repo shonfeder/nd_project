@@ -125,4 +125,11 @@ module Partial = struct
       [deriv_of_b]
       (Partial.Formula.complete Formula.Infix.(a_and_a_imp_b_prop => b_prop))
       ~rule:(Partial.Rule.complete (Complete.Rule.(make ~op:Symbol.Imp ~mode:Intro ())))
+
+  let ex6 =
+    Figure.deriv
+      [Figure.Initial Partial.Formula.Hole]
+      (Partial.Formula.complete Formula.Infix.(a_and_a_imp_b_prop => b_prop))
+      ~rule:(Partial.Rule.complete (Complete.Rule.(make ~op:Symbol.Imp ~mode:Intro ())))
+
 end

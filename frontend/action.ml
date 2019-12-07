@@ -5,7 +5,7 @@ type t =
   | Incr_counter
   | Update_input of string
   | Submit_input
-  | Grow_proof of Natural_deduction.Proof.Zipper.partial
+  | Grow_proof of Natural_deduction.Proof.Focused.t
 [@@deriving sexp]
 
 let should_log _ = true
