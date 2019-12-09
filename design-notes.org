@@ -96,7 +96,7 @@ search) to "sending down roots".
 
 Sending down roots corresponds to elimination rules.
 
-*** Conjunction introduction
+*** Conjunction Elimination
 
 Given the following partial proof, the user must find a way of "thickening" the
 twig. This can only be done by showing how the consequent of the conclusion
@@ -296,7 +296,7 @@ a contradiction.
 *** TODO Simple, menu-based UI to flesh out basic functionality
 - A single menu location
 *** TODO Develop a non-mathy, playful and intuitive representation for the notation
-**** TODO This facilitate embedding the UI into the structures of the terms
+*** TODO Embed the proof transformation UI into the structures of the terms
 - This means the representation must have natural *handles* for every tactic and
   logical move that can be made.
 - This calls for an application of algebraic semiotics:
