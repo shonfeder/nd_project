@@ -35,6 +35,23 @@ let zipper_unit_tests = Helpers.unit_suite "Proof Zipper Unit Tests"
       ;
 
       begin
+        let open Notation in
+        let name = "moving up in proof until None yields an initial formula" in
+        let expected = Some (Figure.assume Formula.Infix.(Ex_proofs.Prop.(x || (y && z)))) in
+        let actual =
+          let open Zipper in
+          let rec find_initial z =
+            match move_up z with
+            | None -> Some (focus z)
+            | Some z' -> find_initial z'
+          in
+          of_figure ex_proof |> find_initial
+        in
+        Nd_unit.test_figure name ~expected ~actual
+      end;
+
+
+      begin
         let name = "moving up in proof yields leftmost figure of upper" in
         let expected = match ex_proof with
           | (Deriv {upper = u :: _; _}) -> Some u

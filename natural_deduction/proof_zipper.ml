@@ -79,13 +79,9 @@ let move_down t = match t.down with
   | []       -> None
   | (t :: _) -> Some t
 
-let of_figure : ('formula, 'rule) Figure.t -> ('formula, 'rule) t =
-  fun fig -> make fig
-
-let rec to_figure : ('formula, 'rule) t -> ('formula, 'rule) Figure.t =
-  fun t -> match move_down t with
-    | None -> t.focus
-    | Some t -> to_figure t
+let rec move_bottom t = match move_down t with
+  | None -> t
+  | Some t -> move_bottom t
 
 let focus t = t.focus
 let peek_left t  = List.hd t.left
@@ -97,6 +93,12 @@ let peek_upper t = match t.focus with
   | Deriv d   -> Some (Figure.upper d)
 
 let peek_up t = Option.(peek_upper t >>= List.hd)
+
+let of_figure : ('formula, 'rule) Figure.t -> ('formula, 'rule) t =
+  fun fig -> make fig
+
+let to_figure : ('formula, 'rule) t -> ('formula, 'rule) Figure.t =
+  fun t -> move_bottom t |> focus
 
 let map : ('formula, 'rule) t -> f:(('formula, 'rule) Figure.t -> ('formula', 'rule') Figure.t) -> ('formula', 'rule') t =
   fun t ~f -> {t with focus = f t.focus}

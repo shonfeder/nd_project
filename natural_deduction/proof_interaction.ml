@@ -28,23 +28,33 @@ module Focused = struct
   let to_figure : t -> Partial.Figure.t =
     fun focused -> focused.proof |> Zipper.to_figure
 
-  let compound_tactics : Formula.compound -> Tactic.t list option = function
-    | Imp _ -> Some [Intro_imp]
-    | And _ -> Some [Elim_and]
-    | _ -> raise (Failure "TODO")
+  let compound_tactics : Formula.compound -> Tactic.t list = function
+    | Imp _ ->
+      [Apply_rule (Rule.make ~op:Imp ~mode:Intro ()) ]
+    | And _ ->
+      [ Apply_rule (Rule.make ~op:And ~mode:Elim ~dir:Left ())
+      ; Apply_rule (Rule.make ~op:And ~mode:Elim ~dir:Right ())
+      ]
+    | _ -> raise (Failure "TODO unhandled compound tactic")
+
+  let formula_tactics : Partial.Formula.t -> Tactic.t list = function
+    | Complete (Comp cmp) -> compound_tactics cmp
+    | _ -> raise (Failure "TODO unhandled possible tactics")
 
   let possible_tactics z =
-    match (Zipper.focus z |> Figure.endformula : Partial.Formula.t) with
-    | Complete (Comp cmp) -> compound_tactics cmp
-    | _ -> raise (Failure "TODO")
+    match Zipper.focus z with
+    | Initial f        -> Tactic.Reiter :: formula_tactics f
+    | (Deriv _ as fig) -> Figure.endformula fig |> formula_tactics
 
-  let explore_tactics {proof; tactics} = match possible_tactics proof with
-    | None -> Error `None
+  let apply_tactic t tactic =
+    match Tactic.apply t.proof tactic with
+    | Error err -> Error err
+    | Ok proof -> Ok {t with proof}
+
+  let explore_tactics t =
+    match possible_tactics t.proof with
+    | [] -> Error `None
     (* If only one tactic is possible, then use it *)
-    | Some [tactic] -> begin
-        match Tactic.apply proof tactic with
-        | Error err -> Error err
-        | Ok proof -> Ok (`Applied ({proof; tactics}))
-      end
-    | Some tactics  -> Ok (`Options {proof; tactics})
+    | [tactic] -> apply_tactic t tactic
+    | tactics  -> Ok {t with tactics}
 end

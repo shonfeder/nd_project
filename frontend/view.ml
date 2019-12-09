@@ -25,9 +25,10 @@ module DerivNode = struct
   let proof_div      = _div "proof"
   let assumption_div = _div "assumption"
 
-  let proof_ui_div    = _div "proof-ui"
-  let tactic_menu_div = _div "tactics-menu"
-  let tactic_item_div = _div "tactics-item"
+  let proof_ui_div   = _div "proof-ui"
+
+  let tactic_ul content = Node.ul [Attr.class_ "tactics-menu"] content
+  let tactic_li handler content = Node.li [handler; Attr.class_ "tactics-item"] content
 end
 
 
@@ -62,7 +63,7 @@ module Make (I : sig val inject: Action.t -> Vdom.Event.t end) = struct
     let disj_op = operator ~name:"disjunction" ~sign:"∨"
     let imp_op  = operator ~name:"implication" ~sign:"→"
 
-    let formula : ?zipper:Proof.Focused.t -> Formula.t -> Node.t = fun ?zipper f ->
+    let formula : ?focused:Proof.Focused.t -> Formula.t -> Node.t = fun ?focused f ->
       let rec subformula f = match (f : Formula.t) with
         | Elem e -> elementary e
         | Comp c -> compound c
@@ -80,7 +81,7 @@ module Make (I : sig val inject: Action.t -> Vdom.Event.t end) = struct
       in
       let attrs =
         let classes = [Attr.classes ["formula"]] in
-        match zipper with
+        match focused with
         | None   -> classes
         | Some z -> sprout_on_click_attr z :: classes
       in
@@ -135,11 +136,9 @@ module Make (I : sig val inject: Action.t -> Vdom.Event.t end) = struct
     let proof_hole_span = Node.span [Attr.classes ["hole"; "proof-hole"]] [Node.text "⋮"]
     let rule_hole_span  = Node.span [Attr.classes ["hole"; "rule-hole"]] []
 
-    (* let view_tactics tactics = TODO *)
-
-    let view_initial : ?zipper:Focused.t -> Partial.Formula.t -> Node.t =
-      fun ?zipper f ->
-      let attrs = match zipper with
+    let view_initial : ?focused:Focused.t -> Partial.Formula.t -> Node.t =
+      fun ?focused f ->
+      let attrs = match focused with
         | None -> []
         | Some z -> [sprout_on_click_attr z]
       in
@@ -148,14 +147,14 @@ module Make (I : sig val inject: Action.t -> Vdom.Event.t end) = struct
       | Promised str -> DerivNode.assumption_div ~attrs ~classes:["promised"] [Node.text str]
       | Hole         -> DerivNode.assumption_div ~attrs ~classes:["hole"] [proof_hole_span]
 
-    let view_formula : ?zipper:Focused.t -> Partial.Formula.t -> Node.t =
-      fun ?zipper f ->
-      let attrs = match zipper with
+    let view_formula : ?focused:Focused.t -> Partial.Formula.t -> Node.t =
+      fun ?focused f ->
+      let attrs = match focused with
         | None -> []
         | Some z -> [sprout_on_click_attr z]
       in
       match f with
-      | Complete f   -> DerivNode.lower_div [Derivation.formula ?zipper f]
+      | Complete f   -> DerivNode.lower_div [Derivation.formula ?focused f]
       | Promised str -> DerivNode.lower_div ~attrs ~classes:["promissed"] [Node.text str]
       | Hole         -> DerivNode.lower_div ~attrs ~classes:["hole"] [proof_hole_span]
 
@@ -166,12 +165,15 @@ module Make (I : sig val inject: Action.t -> Vdom.Event.t end) = struct
 
     let view_tactic : Proof.Tactic.t -> Node.t =
       fun tactic ->
-      DerivNode.tactic_item_div [Node.text @@ Proof.Tactic.to_string tactic]
+      let handler =
+        Vdom.Attr.on_click (fun _ev -> I.inject (Action.Apply_tactic tactic))
+      in
+      DerivNode.tactic_li handler [Node.text @@ Proof.Tactic.to_string tactic]
 
     let view_menu : Proof.Tactic.t list -> Node.t =
       fun tactics ->
       List.map ~f:view_tactic tactics
-      |> DerivNode.tactic_menu_div
+      |> DerivNode.tactic_ul
 
     (* let view : Proof.Focused.t -> Node.t = fun {proof; menu} ->
      *   let rec figure : Partial.Figure.t -> Node.t = function
@@ -193,37 +195,36 @@ module Make (I : sig val inject: Action.t -> Vdom.Event.t end) = struct
      *     ; view_menu menu ] *)
   end
 
-  module Derivation_zipper = struct
+  module Proof = struct
     open Vdom
     open Proof
     open Notation
 
     let view : Focused.t -> Node.t = fun ({proof; tactics} as focused) ->
-      let zip = proof
-      in
-      let rec zipped_fig : Zipper.partial -> Node.t =
-        fun zipper -> match Zipper.focus zipper with
-          | Figure.Initial i -> Partial_derivation.view_initial ~zipper:focused i
+      let rec view_proof : Zipper.partial -> Node.t =
+        fun proof ->
+          let focused = {focused with proof} in
+          match Zipper.focus proof with
+          | Figure.Initial i -> Partial_derivation.view_initial ~focused i
           | Figure.Deriv {rule; lower; _} ->
             DerivNode.derivation_div ~classes:["partial"]
               [ DerivNode.inference_div ~classes:["partial"]
-                  [ zipped_upper (Zipper.move_up zipper)
-                  ; Partial_derivation.view_formula ~zipper:focused lower ]
+                  [ view_upper (Zipper.move_up proof)
+                  ; Partial_derivation.view_formula ~focused lower ]
               ; Partial_derivation.view_rule rule ]
 
-      and zipped_upper : Zipper.partial option -> Node.t =
-        fun z ->
+      and view_upper : Zipper.partial option -> Node.t =
+        fun proof ->
           let rec get_uppers z = match z with
             | None -> []
             | Some z -> z :: (get_uppers @@ Zipper.move_right z)
           in
-          match get_uppers z with
+          match get_uppers proof with
           | []     -> DerivNode.upper_div ~classes:["hole"] [Partial_derivation.proof_hole_span]
-          | uppers -> DerivNode.upper_div (List.map ~f:zipped_fig uppers)
+          | uppers -> DerivNode.upper_div (List.map ~f:view_proof uppers)
       in
-      let proof = zipped_fig zip in
       DerivNode.proof_ui_div
-        [ DerivNode.proof_div ~classes:["partial"] [proof]
+        [ DerivNode.proof_div ~classes:["partial"] [view_proof (Zipper.move_bottom proof)]
         ; Partial_derivation.view_menu tactics ]
   end
 end

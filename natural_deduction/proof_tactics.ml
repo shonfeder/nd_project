@@ -62,11 +62,20 @@ let intro_imp z =
     Ok (Zipper.map ~f z)
   | Some _ -> Error `Not_a_hole
 
-let elim_and _z = raise (Failure "TODO: elim_and")
+let elim_and _z _dir = raise (Failure "TODO")
 
+let apply_rule z (r : Rule.t) = match r.op, r.mode, r.dir with
+  | Imp, Intro, None -> intro_imp z
+  | And, Elim, (Some dir) -> elim_and z dir
+  | _ -> raise (Failure ("TODO: Handle tactic for rule " ^ Rule.to_string r))
 
+(* let open Option.Let_syntax in
+ * let x =  *)
+
+let retier _ = raise (Failure "TODO: Handle reiter")
 
 let apply z tac : 'err result = match (tac : t) with
-  | Intro_imp -> intro_imp z
-  | Elim_and  -> elim_and z
+  | Apply_rule r -> apply_rule z r
+  | Reiter       -> retier z
+
 (* TODO Insert antecedent ... consequent partial into upper *)

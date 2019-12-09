@@ -27,6 +27,11 @@ module Formula = struct
     | Hole (* ⋮ *)
   [@@deriving sexp, compare]
 
+  let to_string = function
+    | Complete f -> Formula.to_string f
+    | Promised p -> p
+    | Hole       -> "..."
+
   let complete f = Complete f
   let promised str = Promised str
   let hole = Hole

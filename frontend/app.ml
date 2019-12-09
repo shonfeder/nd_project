@@ -16,13 +16,34 @@ module Model = struct
 
   let init () = set_default_input ()
 
+  let log_focused_formula (focused : Proof.Focused.t) =
+    Jsoo.Firebug.console##log
+      (focused.proof
+       |> Proof.Zipper.focus
+       |> Notation.Figure.endformula
+       |> Proof.Partial.Formula.to_string)
+
   let grow_proof t (proof : Proof.Focused.t) =
-    Jsoo.Firebug.console##log proof;
-    match Proof.Focused.explore_tactics proof with
-    | Error `None         -> t
-    | Error _err          -> raise (Failure "TODO Handle other user errors")
-    | Ok (`Options _)     -> raise (Failure "TODO Handle options")
-    | Ok (`Applied proof) -> { proof }
+    log_focused_formula proof;
+    (* TODO rm exceptional code *)
+    try match Proof.Focused.explore_tactics proof with
+      | Ok proof -> { proof }
+      | Error `None       -> t
+      | Error `Initial    -> raise (Failure "TODO Handle err: `Initial")
+      | Error `Not_a_hole -> raise (Failure "TODO Handle err: `Not_a_hole")
+    with Failure msg ->
+      Jsoo.Firebug.console##log ("Something went wrong: " ^ msg);
+      t
+
+  let apply_tactic t tactic =
+    try match Proof.Focused.apply_tactic t.proof tactic with
+      | Ok proof -> { proof }
+      | Error `None       -> t
+      | Error `Initial    -> raise (Failure "TODO Handle err: `Initial")
+      | Error `Not_a_hole -> raise (Failure "TODO Handle err: `Not_a_hole")
+    with Failure msg ->
+      Jsoo.Firebug.console##log ("Something went wrong: " ^ msg);
+      t
 
   let cutoff t1 t2 = compare t1 t2 = 0
 end
@@ -37,20 +58,17 @@ let apply_action model action _ ~schedule_action:_ =
   match (action : Action.t) with
   (* TODO *)
   | Grow_proof proof -> Model.grow_proof model proof
+  | Apply_tactic tactic -> Model.apply_tactic model tactic
 
 let on_startup ~schedule_action:_ _ = Async_kernel.return ()
 
 let view (m : Model.t Incr.t) ~inject =
-  (* TODO This is quite bad, no? *)
   let module View = View.Make (struct let inject = inject end) in
   let open Incr.Let_syntax in
   let open Vdom in
   let%map proof =
-    let%map deriv = m >>| Model.proof in
-    Node.div [] [
-      View.Derivation_zipper.view deriv;
-      (* View.Partial_derivation.view deriv *)
-    ]
+    let%map proof = m >>| Model.proof in
+    Node.div [] [ View.Proof.view proof ]
   in
   Node.div [] [ proof ]
 
