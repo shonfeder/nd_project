@@ -10,11 +10,11 @@ propositions, but rather from {i assumptions} to which logical
 deductions are applied.|}
     (`Pg 75)
 
-type fig = Proof.Complete.t
+type fig = Proof_complete.t
 
 module Intro = struct
   open Figure
-  open Proof.Complete
+  open Proof_complete
   open Option.Let_syntax
 
   let conj : fig -> fig -> fig option =
@@ -99,7 +99,7 @@ end
 
 module Elim = struct
   open Figure
-  open Proof.Complete
+  open Proof_complete
   open Option.Let_syntax
 
   let conj_left : fig -> fig option =

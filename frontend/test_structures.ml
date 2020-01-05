@@ -31,7 +31,6 @@ module Partial = struct
   let a_prop = Formula.prop "A"
   let b_prop = Formula.prop "B"
 
-
   let ex =
     (* ⋮    ⋮
      * A   B

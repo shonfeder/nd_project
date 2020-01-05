@@ -5,31 +5,11 @@ open Notation
 module Partial = Proof_partial
 module Zipper = Proof_zipper
 
-(* (\** The tactics that can be used to develop a proof *\)
- * module Tactic_t = struct
- *   type t =
- *     | Intro_imp
- *     | Elim_and
- *   [@@deriving sexp, compare, show { with_path = false }]
- *
- *   let to_string = show
- * end
- *
- * module Tactic_aliases = struct
- *   type 'a err =
- *     [> `Initial
- *     |  `Not_a_hole
- *     ] as 'a
- *
- *   type 'err result = (Zipper.partial, 'err err) Result.t
- *   type 'err application = Zipper.partial -> 'err result
- * end *)
-
 include Proof_tactics_types
 
+exception Impossible
 
 (* TODO Wow this is gnarly... need to refactor and improve approach *)
-exception Impossible
 let intro_imp z =
   match Zipper.peek_upper z with
   | None -> Error `Initial
@@ -62,20 +42,48 @@ let intro_imp z =
     Ok (Zipper.map ~f z)
   | Some _ -> Error `Not_a_hole
 
-let elim_and _z _dir = raise (Failure "TODO")
+let elim_and z dir =
+  let is_hole lower = match Zipper.focus lower |> Figure.get_lower with
+    | None   -> false
+    | Some p -> Partial.Formula.is_hole p
+  in
+  match Zipper.move_down z with
+  | None                                -> Error `Not_a_hole
+  | Some lower when not (is_hole lower) -> Error `Not_a_hole
+  | Some _z' ->
+    let _conj_elim = match (dir : Rule.dir) with
+      | Left  -> Calculus.Elim.conj_left
+      | Right -> Calculus.Elim.conj_right
+    in
+    raise (Failure "TODO")
+
 
 let apply_rule z (r : Rule.t) = match r.op, r.mode, r.dir with
   | Imp, Intro, None -> intro_imp z
   | And, Elim, (Some dir) -> elim_and z dir
   | _ -> raise (Failure ("TODO: Handle tactic for rule " ^ Rule.to_string r))
 
-(* let open Option.Let_syntax in
- * let x =  *)
-
-let retier _ = raise (Failure "TODO: Handle reiter")
+let reiter z : 'err result =
+  match Zipper.focus z with
+  | Deriv _   -> Error `Iter_on_noninitial
+  | Initial _ as i ->
+    let holy_initial =
+      Figure.deriv
+        [i]
+        ~rule:Partial.Rule.hole
+        Partial.Formula.hole
+    in
+    let reiterated =
+      Figure.deriv
+        [holy_initial; holy_initial]
+        ~rule:Partial.Rule.hole
+        Partial.Formula.hole
+    in
+    let new_proof = Zipper.insert_focus z reiterated in
+    Ok new_proof
 
 let apply z tac : 'err result = match (tac : t) with
   | Apply_rule r -> apply_rule z r
-  | Reiter       -> retier z
+  | Reiter       -> reiter z
 
 (* TODO Insert antecedent ... consequent partial into upper *)

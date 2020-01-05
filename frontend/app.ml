@@ -12,7 +12,9 @@ module Model = struct
 
   (* TODO *)
   let set_default_input () =
-    { proof = Proof.Focused.of_figure Test_structures.Partial.ex6 }
+    (* { proof = Proof.Focused.of_figure Test_structures.Partial.ex6 } *)
+    { proof = Proof.Focused.of_figure
+          (Notation.Figure.initial @@ Proof.Partial.Formula.complete Notation.Formula.(prop "A")) }
 
   let init () = set_default_input ()
 
@@ -31,16 +33,27 @@ module Model = struct
       | Error `None       -> t
       | Error `Initial    -> raise (Failure "TODO Handle err: `Initial")
       | Error `Not_a_hole -> raise (Failure "TODO Handle err: `Not_a_hole")
+      | Error `Iter_on_noninitial -> raise (Failure "TODO Handle err: `Iter_on_noninitial")
     with Failure msg ->
       Jsoo.Firebug.console##log ("Something went wrong: " ^ msg);
       t
 
   let apply_tactic t tactic =
+    log_focused_formula t.proof;
     try match Proof.Focused.apply_tactic t.proof tactic with
-      | Ok proof -> { proof }
+      | Ok proof ->
+        Jsoo.Firebug.console##log
+          (Proof.Zipper.to_figure proof.proof
+           |> Notation.Figure.to_string
+             ~formula:Proof.Partial.Formula.to_string
+             ~rule:Proof.Partial.Rule.to_string
+          );
+        log_focused_formula proof;
+        { proof = Proof.Focused.clear_tactics proof }
       | Error `None       -> t
       | Error `Initial    -> raise (Failure "TODO Handle err: `Initial")
       | Error `Not_a_hole -> raise (Failure "TODO Handle err: `Not_a_hole")
+      | Error `Iter_on_noninitial -> raise (Failure "TODO Handle err: `Iter_on_noninitial")
     with Failure msg ->
       Jsoo.Firebug.console##log ("Something went wrong: " ^ msg);
       t

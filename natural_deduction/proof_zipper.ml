@@ -86,7 +86,7 @@ let rec move_bottom t = match move_down t with
 let focus t = t.focus
 let peek_left t  = List.hd t.left
 let peek_right t = List.hd t.right
-let peek_down t  = List.hd t.down
+let peek_down t  = List.hd t.down |> Option.map ~f:focus
 
 let peek_upper t = match t.focus with
   | Initial _ -> None
@@ -103,6 +103,7 @@ let to_figure : ('formula, 'rule) t -> ('formula, 'rule) Figure.t =
 let map : ('formula, 'rule) t -> f:(('formula, 'rule) Figure.t -> ('formula', 'rule') Figure.t) -> ('formula', 'rule') t =
   fun t ~f -> {t with focus = f t.focus}
 
+(** [insert_focus z f] is [z] with the focused figure replaced with [f] *)
 let insert_focus = fun z x -> map ~f:(Fn.const x) z
 
 let insert_left x t = {t with left = x :: t.left}

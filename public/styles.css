@@ -117,3 +117,13 @@ body {
     border-style: none;
     padding-left: 0;
 }
+
+/* Required because styling of source blocks isn't quite working */
+pre.src {
+    background-color: #21242b !important;
+    color: #dddddd !important;
+}
+
+pre.src:hover:before {
+    background-color: #21242b !important:
+}

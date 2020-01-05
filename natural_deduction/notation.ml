@@ -261,10 +261,15 @@ module Figure = struct
     | Initial c -> c
     | Deriv {lower; _} -> lower
 
+  (** TODO Deduplicate *)
   let initial f = Initial f
   let assume p = Initial p
   let deriv upper lower ~rule =
     Deriv (Fields_of_deriv.create ~upper ~lower ~rule)
+
+  let get_lower = function
+    | Initial _        -> None
+    | Deriv {lower; _} -> Some lower
 
   let rec initial_formulae : ('formula, _) t -> 'formula list = function
     | Initial c -> [c]

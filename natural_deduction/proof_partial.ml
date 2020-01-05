@@ -11,6 +11,10 @@ module Rule = struct
     | Hole (* ⋮ *)
   [@@deriving sexp, compare]
 
+  let to_string = function
+    | Complete r | Promised r -> Complete_rule.to_string r
+    | Hole -> "..."
+
   exception Promised_rule_with_dir
 
   let complete r = Complete r
@@ -23,9 +27,9 @@ end
 module Formula = struct
   type t =
     | Complete of Formula.t
-    | Promised of string (* id for formulas which must the same *)
+    | Promised of string (* id for formulas which must be the same *)
     | Hole (* ⋮ *)
-  [@@deriving sexp, compare]
+  [@@deriving sexp, compare, eq]
 
   let to_string = function
     | Complete f -> Formula.to_string f
@@ -35,6 +39,10 @@ module Formula = struct
   let complete f = Complete f
   let promised str = Promised str
   let hole = Hole
+
+  let is_hole = function
+    | Hole -> true
+    | _    -> false
 
   let get_complete = function
     | Complete f -> Some f
@@ -47,4 +55,6 @@ module Figure = struct
 
   type deriv = (Formula.t, Rule.t) Figure.deriv
   [@@deriving sexp, compare]
+
+  let to_string = Figure.to_string ~formula:Formula.to_string ~rule:Rule.to_string
 end

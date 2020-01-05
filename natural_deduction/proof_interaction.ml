@@ -57,4 +57,6 @@ module Focused = struct
     (* If only one tactic is possible, then use it *)
     | [tactic] -> apply_tactic t tactic
     | tactics  -> Ok {t with tactics}
+
+  let clear_tactics t = {t with tactics = []}
 end

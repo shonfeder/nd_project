@@ -13,6 +13,7 @@ let to_string = function
 type 'a err =
   [> `Initial
   |  `Not_a_hole
+  |  `Iter_on_noninitial
   ] as 'a
 [@@deriving show]
 

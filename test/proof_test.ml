@@ -133,5 +133,22 @@ let zipper_unit_tests = Helpers.unit_suite "Proof Zipper Unit Tests"
           Zipper.of_figure p
           |> Zipper.map ~f:(Fun.const @@ Notation.Figure.Initial Ex_proofs.Prop.x)
           |> Zipper.focus
-        end
+        end;
+
+      begin
+        let deriv =
+          Notation.Formula.Infix.(Ex_proofs.Prop.x && Ex_proofs.Prop.y)
+          |> Notation.Figure.initial
+          |> Calculus.Elim.conj_left
+        in
+        Nd_unit.test_figure "insert_focus will replace the focused figure"
+          ~expected:deriv
+          ~actual:begin
+            let open Option.Let_syntax in
+            let%map d = deriv in
+            Zipper.insert_focus (Zipper.of_figure ex_proof) d
+            |> Zipper.focus
+          end
+      end
+
     ]
