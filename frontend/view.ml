@@ -1,8 +1,6 @@
 open Core_kernel
 open Incr_dom
-
 open Natural_deduction
-
 module Jsoo = Js_of_ocaml
 
 let (%) f g x = f (g x)
@@ -34,8 +32,8 @@ end
 
 module Make (I : sig val inject: Action.t -> Vdom.Event.t end) = struct
 
-  let sprout_on_click_attr zipper =
-    Vdom.Attr.on_click (fun _ev -> I.inject (Action.Grow_proof zipper))
+  let on_click_action action =
+    Vdom.Attr.on_click (fun _ev -> I.inject action)
 
   module Derivation = struct
     (** Derivation nodes *)
@@ -83,7 +81,7 @@ module Make (I : sig val inject: Action.t -> Vdom.Event.t end) = struct
         let classes = [Attr.classes ["formula"]] in
         match focused with
         | None   -> classes
-        | Some z -> sprout_on_click_attr z :: classes
+        | Some z -> on_click_action (Action.Grow_proof z) :: classes
       in
       Node.span attrs [subformula f]
 
@@ -140,7 +138,7 @@ module Make (I : sig val inject: Action.t -> Vdom.Event.t end) = struct
       fun ?focused f ->
       let attrs = match focused with
         | None -> []
-        | Some z -> [sprout_on_click_attr z]
+        | Some z -> [on_click_action (Action.Grow_proof z)]
       in
       match f with
       | Complete f   -> Derivation.view_assumption ~attrs f
@@ -151,7 +149,7 @@ module Make (I : sig val inject: Action.t -> Vdom.Event.t end) = struct
       fun ?focused f ->
       let attrs = match focused with
         | None -> []
-        | Some z -> [sprout_on_click_attr z]
+        | Some z -> [on_click_action (Action.Grow_proof z)]
       in
       match f with
       | Complete f   -> DerivNode.lower_div [Derivation.formula ?focused f]
@@ -165,9 +163,7 @@ module Make (I : sig val inject: Action.t -> Vdom.Event.t end) = struct
 
     let view_tactic : Proof.Tactic.t -> Node.t =
       fun tactic ->
-      let handler =
-        Vdom.Attr.on_click (fun _ev -> I.inject (Action.Apply_tactic tactic))
-      in
+      let handler = on_click_action (Action.Apply_tactic tactic) in
       DerivNode.tactic_li handler [Node.text @@ Proof.Tactic.to_string tactic]
 
     let view_menu : Proof.Tactic.t list -> Node.t =
@@ -201,6 +197,9 @@ module Make (I : sig val inject: Action.t -> Vdom.Event.t end) = struct
     open Notation
 
     let view : Focused.t -> Node.t = fun ({proof; tactics} as focused) ->
+      Aux.log_str "Viewing...";
+      (* FIXME *)
+      Aux.log_proof focused;
       let rec view_proof : Zipper.partial -> Node.t =
         fun proof ->
           let focused = {focused with proof} in
@@ -223,8 +222,11 @@ module Make (I : sig val inject: Action.t -> Vdom.Event.t end) = struct
           | []     -> DerivNode.upper_div ~classes:["hole"] [Partial_derivation.proof_hole_span]
           | uppers -> DerivNode.upper_div (List.map ~f:view_proof uppers)
       in
+      let from_bottom = (Zipper.move_bottom proof) in
+      Aux.log_str ">>> From Bottom";
+      Aux.log_proof {focused with proof = from_bottom};
       DerivNode.proof_ui_div
-        [ DerivNode.proof_div ~classes:["partial"] [view_proof (Zipper.move_bottom proof)]
+        [ DerivNode.proof_div ~classes:["partial"] [view_proof from_bottom]
         ; Partial_derivation.view_menu tactics ]
   end
 end

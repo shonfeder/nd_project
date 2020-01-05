@@ -39,6 +39,7 @@ module Focused = struct
 
   let formula_tactics : Partial.Formula.t -> Tactic.t list = function
     | Complete (Comp cmp) -> compound_tactics cmp
+    | Complete (Elem _) -> [] (* TODO Ensure correct *)
     | _ -> raise (Failure "TODO unhandled possible tactics")
 
   let possible_tactics z =

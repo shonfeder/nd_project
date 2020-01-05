@@ -3,11 +3,24 @@
 
 * Tasks
 ** DONE Implement structure for partial proofs
-** DONE Implement Reiter tactic
+** TODO Implement Reiter tactic
 :PROPERTIES:
 :ESTIMATE: 2hr
 :END:
 :LOGBOOK:
+CLOCK: [2020-01-05 Sun 15:24]
+CLOCK: [2020-01-05 Sun 14:42]--[2020-01-05 Sun 15:00] =>  0:18
+#+BEGIN: clocktable :scope subtree :maxlevel 2
+#+CAPTION: Clock summary at [2020-01-05 Sun 15:23]
+| Headline                    | Time   |      |
+|-----------------------------+--------+------|
+| *Total time*                | *2:35* |      |
+|-----------------------------+--------+------|
+| \_  Implement Reiter tactic |        | 2:35 |
+#+END:
+
+CLOCK: [2020-01-05 Sun 14:09]--[2020-01-05 Sun 14:18] =>  0:09
+CLOCK: [2020-01-05 Sun 13:40]--[2020-01-05 Sun 13:49] =>  0:09
 CLOCK: [2020-01-05 Sun 08:58]--[2020-01-05 Sun 10:00] =>  1:02
 CLOCK: [2020-01-04 Sat 22:21]--[2020-01-04 Sat 22:57] =>  0:36
 CLOCK: [2020-01-02 Thu 17:51]--[2020-01-02 Thu 17:57] =>  0:06
