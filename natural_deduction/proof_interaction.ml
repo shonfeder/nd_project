@@ -6,8 +6,8 @@ module Tactic = Proof_tactics
 
 module type Focused = sig
   val possible_tactics : Zipper.partial -> Tactic.t list option
-  val using_tactic : Zipper.partial -> Tactic.t -> _ Tactic.result
-  val explore_tactics : Zipper.partial -> [> `Applied of _ Tactic.result
+  val using_tactic : Zipper.partial -> Tactic.t -> Tactic.result
+  val explore_tactics : Zipper.partial -> [> `Applied of Tactic.result
                                           | `Options of Tactic.t sexp_list ] option
 end
 
@@ -54,7 +54,7 @@ module Focused = struct
 
   let explore_tactics t =
     match possible_tactics t.proof with
-    | [] -> Error `None
+    | [] -> Error `No_tactics
     (* If only one tactic is possible, then use it *)
     | [tactic] -> apply_tactic t tactic
     | tactics  -> Ok {t with tactics}

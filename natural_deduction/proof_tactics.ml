@@ -63,7 +63,7 @@ let apply_rule z (r : Rule.t) = match r.op, r.mode, r.dir with
   | And, Elim, (Some dir) -> elim_and z dir
   | _ -> raise (Failure ("TODO: Handle tactic for rule " ^ Rule.to_string r))
 
-let reiter z : 'err result =
+let reiter z : result =
   match Zipper.focus z with
   | Deriv _  -> Error `Iter_on_noninitial
   | initial  ->
@@ -81,8 +81,6 @@ let reiter z : 'err result =
     | Some p -> Ok p
     | None   -> Error (`Unknown "reiter")
 
-let apply z tac : 'err result = match (tac : t) with
+let apply z tac : result = match (tac : t) with
   | Apply_rule r -> apply_rule z r
   | Reiter       -> reiter z
-
-(* TODO Insert antecedent ... consequent partial into upper *)

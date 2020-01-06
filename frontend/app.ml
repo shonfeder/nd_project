@@ -23,7 +23,7 @@ module Model = struct
     (* TODO rm exceptional code *)
     try match Proof.Focused.explore_tactics proof with
       | Ok proof -> { proof }
-      | Error `None       -> t
+      | Error `No_tactics -> t
       | Error `Initial    -> raise (Failure "TODO Handle err: `Initial")
       | Error `Not_a_hole -> raise (Failure "TODO Handle err: `Not_a_hole")
       | Error `Iter_on_noninitial -> raise (Failure "TODO Handle err: `Iter_on_noninitial")
@@ -40,7 +40,7 @@ module Model = struct
         Aux.log_str "After...";
         Aux.log_proof proof;
         { proof = Proof.Focused.clear_tactics proof }
-      | Error `None       -> t
+      | Error `No_tactics -> t
       | Error `Initial    -> raise (Failure "TODO Handle err: `Initial")
       | Error `Not_a_hole -> raise (Failure "TODO Handle err: `Not_a_hole")
       | Error `Iter_on_noninitial -> raise (Failure "TODO Handle err: `Iter_on_noninitial")
