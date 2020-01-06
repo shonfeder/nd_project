@@ -8,7 +8,20 @@
 :ESTIMATE: 2hr
 :END:
 :LOGBOOK:
-CLOCK: [2020-01-05 Sun 15:24]
+CLOCK: [2020-01-05 Sun 20:04]
+CLOCK: [2020-01-05 Sun 19:19]--[2020-01-05 Sun 19:24] =>  0:05
+CLOCK: [2020-01-05 Sun 18:43]--[2020-01-05 Sun 19:12] =>  0:29
+CLOCK: [2020-01-05 Sun 16:37]--[2020-01-05 Sun 17:42] =>  1:05
+CLOCK: [2020-01-05 Sun 15:24]--[2020-01-05 Sun 15:29] =>  0:05
+#+BEGIN: clocktable :scope subtree :maxlevel 2
+#+CAPTION: Clock summary at [2020-01-05 Sun 19:24]
+| Headline                    | Time   |      |
+|-----------------------------+--------+------|
+| *Total time*                | *4:19* |      |
+|-----------------------------+--------+------|
+| \_  Implement Reiter tactic |        | 4:19 |
+#+END:
+
 CLOCK: [2020-01-05 Sun 14:42]--[2020-01-05 Sun 15:00] =>  0:18
 #+BEGIN: clocktable :scope subtree :maxlevel 2
 #+CAPTION: Clock summary at [2020-01-05 Sun 15:23]
