@@ -65,22 +65,21 @@ let apply_rule z (r : Rule.t) = match r.op, r.mode, r.dir with
 
 let reiter z : 'err result =
   match Zipper.focus z with
-  | Deriv _   -> Error `Iter_on_noninitial
-  | Initial _ as i ->
-    let holy_initial =
+  | Deriv _  -> Error `Iter_on_noninitial
+  | initial  ->
+    let holey_initial =
       Figure.deriv
-        [i]
+        [initial]
         ~rule:Partial.Rule.hole
         Partial.Formula.hole
     in
-    let reiterated =
-      Figure.deriv
-        [holy_initial; holy_initial]
-        ~rule:Partial.Rule.hole
-        Partial.Formula.hole
+    let new_proof =
+      Zipper.insert_focus z holey_initial
+      |> Zipper.insert_left holey_initial
     in
-    let new_proof = Zipper.insert_focus z reiterated in
-    Ok new_proof
+    match new_proof with
+    | Some p -> Ok p
+    | None   -> Error (`Unknown "reiter")
 
 let apply z tac : 'err result = match (tac : t) with
   | Apply_rule r -> apply_rule z r

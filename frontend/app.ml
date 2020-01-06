@@ -27,6 +27,7 @@ module Model = struct
       | Error `Initial    -> raise (Failure "TODO Handle err: `Initial")
       | Error `Not_a_hole -> raise (Failure "TODO Handle err: `Not_a_hole")
       | Error `Iter_on_noninitial -> raise (Failure "TODO Handle err: `Iter_on_noninitial")
+      | Error (`Unknown err) -> raise (Failure ("Unknown error: " ^ err))
     with Failure msg ->
       Aux.log_err ("Something went wrong: " ^ msg);
       t
@@ -43,6 +44,7 @@ module Model = struct
       | Error `Initial    -> raise (Failure "TODO Handle err: `Initial")
       | Error `Not_a_hole -> raise (Failure "TODO Handle err: `Not_a_hole")
       | Error `Iter_on_noninitial -> raise (Failure "TODO Handle err: `Iter_on_noninitial")
+      | Error (`Unknown err) -> raise (Failure ("Unknown error: " ^ err))
     with Failure msg ->
       Aux.log_err ("Something went wrong: " ^ msg);
       t

@@ -14,6 +14,7 @@ type 'a err =
   [> `Initial
   |  `Not_a_hole
   |  `Iter_on_noninitial
+  |  `Unknown of string
   ] as 'a
 [@@deriving show]
 
