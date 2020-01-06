@@ -7,13 +7,13 @@ module Partial = Proof_partial
 (** NOTE Adapted from
     https://www.st.cs.uni-saarland.de/edu/seminare/2005/advanced-fp/docs/huet-zipper.pdf *)
 
-(* TODO Replace with optional value *)
-type ('formula, 'rule) path =
-  | End
-  | Way of ('formula, 'rule) way
-[@@deriving compare, sexp]
+(* (\* TODO Replace with optional value *\)
+ * type ('formula, 'rule) path =
+ *   | End
+ *   | Way of ('formula, 'rule) way
+ * [@@deriving compare, sexp] *)
 
-and ('formula, 'rule) way =
+type ('formula, 'rule) path =
   { left: ('formula, 'rule) Figure.t list
   (** The derivations to left of the focus on the same line *)
   ; right: ('formula, 'rule) Figure.t list
@@ -22,14 +22,14 @@ and ('formula, 'rule) way =
   (** The lower formula in the derivation *)
   ; rule: 'rule
   (** The rule that gets us to the lower formula *)
-  ; path: ('formula, 'rule) path
+  ; path: ('formula, 'rule) path option
   (** The way we got to the current location *)
   }
 [@@deriving compare, fields, sexp]
 
 type ('formula, 'rule) t =
   { focus: ('formula, 'rule) Figure.t
-  ; path: ('formula, 'rule) path
+  ; path: ('formula, 'rule) path option
   }
 [@@deriving compare, fields, sexp]
 
@@ -38,7 +38,7 @@ type partial = (Partial.Formula.t, Partial.Rule.t) t
 type complete = (Formula.t, Rule.t) t
 [@@deriving compare, sexp]
 
-let make ?(path=End) focus  =
+let make ?(path=None) focus  =
   Fields.create ~focus ~path
 
 (** Move the focus to the left sibling figure
@@ -51,11 +51,11 @@ let make ?(path=End) focus  =
 *)
 let move_left {focus = x; path} =
   match path with
-  | End -> None | Way {left = []; _} -> None
-  | Way ({left = focus :: left; _} as way) ->
-    let path = Way { way with left
-                            ; right = x :: way.right
-                   }
+  | None -> None | Some {left = []; _} -> None
+  | Some ({left = focus :: left; _} as way) ->
+    let path = Some { way with left
+                             ; right = x :: way.right
+                    }
     in
     Some {focus; path}
 
@@ -68,11 +68,11 @@ let move_left {focus = x; path} =
     [move_Right t] is [None] if rightmost is already in focus. *)
 let move_right {focus = x; path} =
   match path with
-  | End -> None | Way {right = []; _} -> None
-  | Way ({right = focus :: right; _} as way) ->
-    let path = Way { way with left = x :: way.left
-                            ; right
-                   }
+  | None -> None | Some {right = []; _} -> None
+  | Some ({right = focus :: right; _} as way) ->
+    let path = Some { way with left = x :: way.left
+                             ; right
+                    }
     in
     Some {focus; path}
 
@@ -88,7 +88,7 @@ let move_right {focus = x; path} =
 let move_up {focus; path} = match focus with
   | Initial _ | Deriv {upper = []; _} -> None
   | Deriv {upper = (focus :: right); rule; lower} ->
-    let path = Way {right; left = []; path; rule; lower}
+    let path = Some {right; left = []; path; rule; lower}
     in
     Some {focus; path}
 
@@ -104,8 +104,8 @@ let move_up {focus; path} = match focus with
     [move_down] is [None] if the concluding inference figure is already in
     focus .*)
 let move_down t = match t.path with
-  | End -> None
-  | Way {left; right; path; rule; lower} ->
+  | None -> None
+  | Some {left; right; path; rule; lower} ->
     let focus =
       Figure.deriv (List.rev left @ [t.focus] @ right)
         ~rule
@@ -119,12 +119,12 @@ let rec move_bottom t = match move_down t with
   | Some t -> move_bottom t
 
 let rule t = match t.path with
-  | End   -> None
-  | Way p -> Some p.rule
+  | None   -> None
+  | Some p -> Some p.rule
 
 let lower t = match t.path with
-  | End   -> None
-  | Way p -> Some p.lower
+  | None   -> None
+  | Some p -> Some p.lower
 
 let focus t = t.focus
 let peek_left t  = List.hd t.left
@@ -152,6 +152,6 @@ let insert_focus = fun z x -> map ~f:(Fn.const x) z
 (** [insert_left fig z] inserts is [Some new_proof] with [fig] inserted left of
     the focus, unless the final formula is focused, in which case it is [None]. *)
 let insert_left fig t = match t.path with
-  | End -> None
-  | Way ({left; _} as w) ->
-    Some {t with path = Way {w with left = fig :: left}}
+  | None -> None
+  | Some ({left; _} as w) ->
+    Some {t with path = Some {w with left = fig :: left}}
