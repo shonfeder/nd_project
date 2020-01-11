@@ -10,29 +10,7 @@ propositions, but rather from {i assumptions} to which logical
 deductions are applied.|}
     (`Pg 75)
 
-module type Proof = sig
-  (** Interface for the functionality required by the calculus to construct new
-      figures according to the derivation rules*)
-
-  module Rule : sig
-    type t
-
-    val make : op:Symbol.logic -> mode:Rule.mode -> ?dir:Rule.dir -> unit -> t
-  end
-
-  module Formula : sig
-    type t
-    val equal : t -> t -> bool
-    val complete : Formula.t -> t
-    val to_complete : t -> Formula.t option
-  end
-
-  module Figure : sig
-    type t = (Formula.t, Rule.t) Figure.t
-  end
-end
-
-module Make (P : Proof) = struct
+module Make (P : Proof_intf.S) = struct
   (** [module Calculus = Make (P) is a calculus for proofs which are either
       [Partial] or [Complete], allowing the derivation rules of the calculus to
       apply to proofs of the respective kinds. *)

@@ -1,6 +1,6 @@
 open Notation
 
-module Rule    = Rule
+module Rule = Rule
 
 module Formula = struct
   include Formula
@@ -9,6 +9,7 @@ module Formula = struct
 end
 
 module Figure = struct
+  include Figure
   type t = (Formula.t, Rule.t) Figure.t
   [@@deriving sexp, compare]
 

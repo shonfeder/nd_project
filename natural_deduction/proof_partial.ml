@@ -11,6 +11,12 @@ module Rule = struct
     | Hole (* ⋮ *)
   [@@deriving sexp, compare]
 
+  type mode = Rule.mode
+  [@@deriving sexp, compare, show]
+
+  type dir = Rule.dir
+  [@@deriving sexp, compare, show]
+
   let to_string = function
     | Complete r | Promised r -> Complete_rule.to_string r
     | Hole -> "..."

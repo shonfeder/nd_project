@@ -107,7 +107,7 @@ module Make (I : sig val inject: Action.t -> Vdom.Event.t end) = struct
         | Some Left  -> Node.span [Attr.class_ "direction"] [Node.text "L"]
         | Some Right -> Node.span [Attr.class_ "direction"] [Node.text "R"]
       in
-      fun Rule.{op; mode; dir} -> [view_op op; view_mode mode; view_dir dir]
+      fun {op; mode; dir} -> [view_op op; view_mode mode; view_dir dir]
 
     let view_assumption : ?attrs:(Attr.t list) -> Formula.t -> Node.t =
       fun ?attrs ass -> DerivNode.assumption_div ?attrs [formula ass]
