@@ -2,7 +2,9 @@ open Core_kernel
 open Natural_deduction
 open Helpers
 
+module Calculus = Calculus.Make (Proof.Complete)
 open Calculus
+
 open Notation
 open Option.Let_syntax
 

@@ -3,12 +3,23 @@
 
 * Tasks
 ** DONE Implement structure for partial proofs
-** TODO Implement Reiter tactic
+** DONE Implement Reiter tactic
 :PROPERTIES:
-:ESTIMATE: 2hr
+:ESTIMATE: 2:00
+:actual:   5:10
 :END:
 :LOGBOOK:
-CLOCK: [2020-01-05 Sun 20:04]
+CLOCK: [2020-01-05 Sun 20:47]--[2020-01-05 Sun 20:58] =>  0:11
+#+BEGIN: clocktable :scope subtree :maxlevel 2
+#+CAPTION: Clock summary at [2020-01-05 Sun 20:58]
+| Headline                    | Time   |      |
+|-----------------------------+--------+------|
+| *Total time*                | *5:10* |      |
+|-----------------------------+--------+------|
+| \_  Implement Reiter tactic |        | 5:10 |
+#+END:
+
+CLOCK: [2020-01-05 Sun 20:04]--[2020-01-05 Sun 20:44] =>  0:40
 CLOCK: [2020-01-05 Sun 19:19]--[2020-01-05 Sun 19:24] =>  0:05
 CLOCK: [2020-01-05 Sun 18:43]--[2020-01-05 Sun 19:12] =>  0:29
 CLOCK: [2020-01-05 Sun 16:37]--[2020-01-05 Sun 17:42] =>  1:05
@@ -55,6 +66,28 @@ distressing to learn that program is so poorly organized, and/or in general it's
 so easy to loose track of how a program works.
 
 Feeling like my abilities are so far from where I wish they were... :(
+** DONE Generalize calculus to a calculus of partial proofs
+:PROPERTIES:
+:ESTIMATE: 1:00
+:ACTUAL:   1:36
+:END:
+:LOGBOOK:
+#+BEGIN: clocktable :scope subtree :maxlevel 2
+#+CAPTION: Clock summary at [2020-01-11 Sat 15:42]
+| Headline     | Time   |
+|--------------+--------|
+| *Total time* | *1:36* |
+|--------------+--------|
+#+END:
+
+CLOCK: [2020-01-11 Sat 14:50]--[2020-01-11 Sat 15:42] =>  0:52
+CLOCK: [2020-01-11 Sat 14:22]--[2020-01-11 Sat 14:42] =>  0:20
+CLOCK: [2020-01-11 Sat 12:09]--[2020-01-11 Sat 12:28] =>  0:19
+CLOCK: [2020-01-10 Fri 22:24]--[2020-01-10 Fri 22:29] =>  0:05
+:END:
+
+
+** TODO Make calculus work on focused proofs?
 ** TODO List all tactics
 ** TODO Add tutorial
 *** Principles

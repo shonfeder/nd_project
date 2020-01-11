@@ -22,6 +22,8 @@ module Rule = struct
     | None   -> Promised r
     | Some _ -> raise Promised_rule_with_dir
   let hole      = Hole
+
+  let make ~op ~mode ?dir () = Complete_rule.make ~op ~mode ?dir () |> complete
 end
 
 module Formula = struct
@@ -44,7 +46,7 @@ module Formula = struct
     | Hole -> true
     | _    -> false
 
-  let get_complete = function
+  let to_complete = function
     | Complete f -> Some f
     | _ -> None
 end

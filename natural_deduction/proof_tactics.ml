@@ -7,6 +7,8 @@ module Zipper = Proof_zipper
 
 include Proof_tactics_types
 
+module Calculus = Calculus.Make (Proof_complete)
+
 exception Impossible
 
 (* TODO Wow this is gnarly... need to refactor and improve approach *)
@@ -20,7 +22,7 @@ let intro_imp z =
         let partial_imp_intro =
           let (a, b) =
             Option.(value_exn ~message:"Invalid goal for tactic"
-                      (Partial.Formula.get_complete deriv.lower >>= Formula.get_imp))
+                      (Partial.Formula.to_complete deriv.lower >>= Formula.get_imp))
           in
           let ass_a_hole =
             Figure.deriv

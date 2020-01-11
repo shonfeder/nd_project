@@ -1,6 +1,7 @@
 open! Core_kernel
 open Natural_deduction
 
+module Calculus = Calculus.Make (Proof.Complete)
 open Option.Monad_infix
 module Zipper = Proof.Zipper
 

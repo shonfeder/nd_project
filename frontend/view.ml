@@ -112,8 +112,8 @@ module Make (I : sig val inject: Action.t -> Vdom.Event.t end) = struct
     let view_assumption : ?attrs:(Attr.t list) -> Formula.t -> Node.t =
       fun ?attrs ass -> DerivNode.assumption_div ?attrs [formula ass]
 
-    let view : Proof.Complete.t -> Node.t = fun d ->
-      let rec figure : Proof.Complete.t -> Node.t =
+    let view : Proof.Complete.Figure.t -> Node.t = fun d ->
+      let rec figure : Proof.Complete.Figure.t -> Node.t =
         function | Initial ass -> view_assumption ass
                  | Deriv d     -> deriv d
       and deriv : _ Figure.deriv -> Node.t =

@@ -1,7 +1,20 @@
-module Rule = Rule
 open Notation
 
-type t = (Formula.t, Rule.t) Figure.t
-[@@deriving sexp, compare]
+module Rule    = Rule
 
-let to_string : t -> string = Figure.to_string ~formula:Formula.to_string ~rule:Rule.to_string
+module Formula = struct
+  include Formula
+  let complete x = x
+  let to_complete x = Some x
+end
+
+module Figure = struct
+  type t = (Formula.t, Rule.t) Figure.t
+  [@@deriving sexp, compare]
+
+  let to_string : t -> string = Figure.to_string ~formula:Formula.to_string ~rule:Rule.to_string
+end
+
+(* type t = (Formula.t, Rule.t) Figure.t
+ * [@@deriving sexp, compare] *)
+

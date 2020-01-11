@@ -4,6 +4,8 @@ open Core_kernel
 open Natural_deduction
 open Notation
 
+module Calculus = Calculus.Make (Proof.Complete)
+
 let derivation =
   let open Option.Let_syntax in
   let a = Formula.(not_ (prop "A"))

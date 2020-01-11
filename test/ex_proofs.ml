@@ -2,6 +2,8 @@ open! Core_kernel
 open Natural_deduction
 open Notation
 
+module Calculus = Calculus.Make (Proof.Complete)
+
 module Prop = struct
   let x = Formula.prop "X"
   let y = Formula.prop "Y"
@@ -43,6 +45,6 @@ module Ex_1_1 = struct
       in
       Elim.disj x_or_y_and_z_ass from_x from_x_and_z
     in
-    print_endline (Proof.Complete.to_string x_or_y_and_x_or_z);
+    print_endline (Proof.Complete.Figure.to_string x_or_y_and_x_or_z);
     Intro.imp x_or_y_and_z x_or_y_and_x_or_z
 end
