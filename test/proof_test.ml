@@ -15,22 +15,22 @@ let zipper_unit_tests = Helpers.unit_suite "Proof Zipper Unit Tests"
           let f x = Zipper.(x |> of_figure |> focus) in
           Option.map ~f Ex_proofs.Ex_1_1.proof
         in
-        Nd_unit.test_figure name
+        Nd_unit.Complete.test_figure name
           ~expected:Ex_proofs.Ex_1_1.proof
           ~actual
       end;
 
-      Nd_unit.test_figure "moving down on terminal proof is None"
+      Nd_unit.Complete.test_figure "moving down on terminal proof is None"
         ~expected:None
         ~actual:Zipper.(Option.map ~f:of_figure Ex_proofs.Ex_1_1.proof >>= move_down >>| focus)
       ;
 
-      Nd_unit.test_figure "moving left on terminal proof is None"
+      Nd_unit.Complete.test_figure "moving left on terminal proof is None"
         ~expected:None
         ~actual:Zipper.(Option.map ~f:of_figure Ex_proofs.Ex_1_1.proof >>= move_left >>| focus)
       ;
 
-      Nd_unit.test_figure "moving right on terminal proof is None"
+      Nd_unit.Complete.test_figure "moving right on terminal proof is None"
         ~expected:None
         ~actual:Zipper.(Option.map ~f:of_figure Ex_proofs.Ex_1_1.proof >>= move_right >>| focus)
       ;
@@ -48,7 +48,7 @@ let zipper_unit_tests = Helpers.unit_suite "Proof Zipper Unit Tests"
           in
           of_figure ex_proof |> find_initial
         in
-        Nd_unit.test_figure name ~expected ~actual
+        Nd_unit.Complete.test_figure name ~expected ~actual
       end;
 
 
@@ -64,7 +64,7 @@ let zipper_unit_tests = Helpers.unit_suite "Proof Zipper Unit Tests"
           |> move_up
           |> Option.map ~f:focus
         in
-        Nd_unit.test_figure name ~expected ~actual
+        Nd_unit.Complete.test_figure name ~expected ~actual
       end;
 
       begin
@@ -80,7 +80,7 @@ let zipper_unit_tests = Helpers.unit_suite "Proof Zipper Unit Tests"
         let actual =
           Zipper.(of_figure ex_proof |> move_up >>= move_up >>= move_right >>| focus)
         in
-        Nd_unit.test_figure name ~expected ~actual
+        Nd_unit.Complete.test_figure name ~expected ~actual
       end;
 
       begin
@@ -95,15 +95,15 @@ let zipper_unit_tests = Helpers.unit_suite "Proof Zipper Unit Tests"
                   move_down  >>= move_down >>|
                   focus)
         in
-        Nd_unit.test_figure name ~expected ~actual
+        Nd_unit.Complete.test_figure name ~expected ~actual
       end;
 
-      Nd_unit.test_figure "(to_figure % of_figure) is the identity on a figure"
+      Nd_unit.Complete.test_figure "(to_figure % of_figure) is the identity on a figure"
         ~expected:Ex_proofs.Ex_1_1.proof
         ~actual:Option.(Ex_proofs.Ex_1_1.proof >>| Zipper.of_figure >>| Zipper.to_figure)
       ;
 
-      Nd_unit.test_figure "moving around and converting to_figure is still identity on a figure"
+      Nd_unit.Complete.test_figure "moving around and converting to_figure is still identity on a figure"
         ~expected:Ex_proofs.Ex_1_1.proof
         ~actual:Option.(
             Ex_proofs.Ex_1_1.proof
@@ -116,7 +116,7 @@ let zipper_unit_tests = Helpers.unit_suite "Proof Zipper Unit Tests"
       ;
 
 
-      Nd_unit.test_figure "mapping over the focused initial formula"
+      Nd_unit.Complete.test_figure "mapping over the focused initial formula"
         ~expected:(Option.some @@ Notation.Figure.Initial Ex_proofs.Prop.x)
         ~actual:begin
           Notation.Figure.Initial Ex_proofs.Prop.y
@@ -126,7 +126,7 @@ let zipper_unit_tests = Helpers.unit_suite "Proof Zipper Unit Tests"
           |> Option.some
         end;
 
-      Nd_unit.test_figure "mapping over the focused derived formula"
+      Nd_unit.Complete.test_figure "mapping over the focused derived formula"
         ~expected:(Option.some @@ Notation.Figure.Initial Ex_proofs.Prop.x)
         ~actual:begin
           let open Option.Let_syntax in
@@ -142,7 +142,7 @@ let zipper_unit_tests = Helpers.unit_suite "Proof Zipper Unit Tests"
           |> Notation.Figure.initial
           |> Calculus.Elim.conj_left
         in
-        Nd_unit.test_figure "insert_focus will replace the focused figure"
+        Nd_unit.Complete.test_figure "insert_focus will replace the focused figure"
           ~expected:deriv
           ~actual:begin
             let open Option.Let_syntax in

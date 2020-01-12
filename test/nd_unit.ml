@@ -6,52 +6,28 @@ let testable_formula =
   let pp = Fmt.of_to_string Formula.to_string in
   Alcotest.testable pp Formula.equal
 
-let testable_figure =
-  let pp =
-    let to_string =
-      let formula = Formula.to_string in
-      let rule = Proof.Complete.Rule.to_string in
-      Figure.to_string ~formula ~rule
+module Make (P : Proof.S) = struct
+  let figure =
+    let pp = Fmt.of_to_string P.Figure.to_string in
+    let equal = P.Figure.equal
     in
-    Fmt.of_to_string to_string
-  in
-  let equal =
-    let formula = Formula.compare in
-    let rule = Proof.Complete.Rule.compare in
-    Figure.equal ~formula ~rule
-  in
-  Alcotest.testable pp equal
+    Alcotest.testable pp equal
 
-let testable_partial =
-  let pp =
-    let to_string =
-      let formula = Proof.Partial.Formula.to_string in
-      let rule = Proof.Partial.Rule.to_string in
-      Figure.to_string ~formula ~rule
-    in
-    Fmt.of_to_string to_string
-  in
-  let equal =
-    let formula = Proof.Partial.Formula.compare in
-    let rule = Proof.Partial.Rule.compare in
-    Figure.equal ~formula ~rule
-  in
-  Alcotest.testable pp equal
+  let formula =
+    let pp = Fmt.of_to_string P.Formula.to_string in
+    Alcotest.testable pp P.Formula.equal
 
-let testable_partial_formula =
-  let pp = Fmt.of_to_string Proof.Partial.Formula.to_string in
-  Alcotest.testable pp Proof.Partial.Formula.equal
+  (** True when [deriv] is a derivations of [concludes] *)
+  let test_deriv name ~concludes deriv =
+    let actual = Option.map ~f:Figure.endformula deriv in
+    Helpers.unit name (Alcotest.option formula) ~expected:(Some concludes) ~actual
 
-(** True when [deriv] is a derivations of [concludes] *)
-let test_deriv name ~concludes deriv =
-  let actual = Option.map ~f:Figure.endformula deriv in
-  Helpers.unit name (Alcotest.option testable_formula) ~expected:(Some concludes) ~actual
+  let test_upper name ~expected ~actual =
+    Helpers.unit name (Alcotest.list figure) ~expected ~actual
 
-let test_upper name ~expected ~actual =
-  Helpers.unit name (Alcotest.list testable_figure) ~expected ~actual
+  let test_figure name ~expected ~actual =
+    Helpers.unit name (Alcotest.option figure) ~expected ~actual
+end (* Proof *)
 
-let test_figure name ~expected ~actual =
-  Helpers.unit name (Alcotest.option testable_figure) ~expected ~actual
-
-let test_partial_figure name ~expected ~actual =
-  Helpers.unit name (Alcotest.option testable_partial) ~expected ~actual
+module Partial  = Make (Proof.Partial)
+module Complete = Make (Proof.Complete)

@@ -86,7 +86,14 @@ CLOCK: [2020-01-11 Sat 12:09]--[2020-01-11 Sat 12:28] =>  0:19
 CLOCK: [2020-01-10 Fri 22:24]--[2020-01-10 Fri 22:29] =>  0:05
 :END:
 
-
+** DONE Add modularized tests for complete and partial derivs
+:PROPERTIES:
+:ESTIMATE: 0:30
+:ACTUAL:   0:51
+:END:
+:LOGBOOK:
+CLOCK: [2020-01-11 Sat 20:46]--[2020-01-11 Sat 21:37] =>  0:51
+:END:
 ** TODO Make calculus work on focused proofs?
 ** TODO List all tactics
 ** TODO Add tutorial

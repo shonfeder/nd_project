@@ -16,6 +16,7 @@ module Make (P : Proof_intf.S) = struct
       apply to proofs of the respective kinds. *)
 
   type fig = P.Figure.t
+  type formula = P.Formula.t
 
   (* TODO Allow for promised formulas? *)
   (** [get_endformula fig] is [Some f] if [f] is the complete endformula of
@@ -47,8 +48,9 @@ module Make (P : Proof_intf.S) = struct
         (************) ~rule
         Infix.(a && b)
 
-    let disj_right : fig -> Formula.t -> fig option =
+    let disj_right : fig -> formula -> fig option =
       fun a_fig b ->
+      let%bind b = P.Formula.to_complete b in
       let%map a = get_endformula a_fig in
       let rule = P.Rule.(make ~op:Symbol.Or ~mode:Intro ~dir:Right ()) in
       deriv
@@ -56,8 +58,9 @@ module Make (P : Proof_intf.S) = struct
         (******) ~rule
         Infix.(a || b)
 
-    let disj_left : Formula.t -> fig -> fig option =
+    let disj_left : formula -> fig -> fig option =
       fun a b_fig ->
+      let%bind a = P.Formula.to_complete a in
       let%map b = get_endformula b_fig in
       let rule = P.Rule.(make ~op:Symbol.Or ~mode:Intro ~dir:Left ()) in
       deriv
@@ -176,8 +179,9 @@ module Make (P : Proof_intf.S) = struct
           Formula.(def F)
       end
 
-    let absurd : fig -> Formula.t -> fig option =
+    let absurd : fig -> formula -> fig option =
       fun false_fig d ->
+      let%bind d = P.Formula.to_complete d in
       let%bind f = get_endformula false_fig in
       Option.some_if Formula.(equal (def F) f) begin
         let rule = P.Rule.(make ~op:Symbol.Explode ~mode:Elim ()) in

@@ -25,7 +25,7 @@ let tactics_unit_tests = Helpers.unit_suite "Proof Tactics Unit Tests"
         in
         let () = print_fig fig in
         Helpers.unit "reiter reiterates initial figures in derivation"
-          Alcotest.(list Nd_unit.testable_partial_formula)
+          Alcotest.(list Nd_unit.Partial.formula)
           (* After reiter, it's expected to have 2 initial formula *)
           ~expected:[p; p]
           ~actual:begin
@@ -55,7 +55,7 @@ let tactics_unit_tests = Helpers.unit_suite "Proof Tactics Unit Tests"
         in
         let () = print_fig fig in
         Helpers.unit "Focused.apply_tactics reiterates initial figures in derivation"
-          Alcotest.(list Nd_unit.testable_partial_formula)
+          Alcotest.(list Nd_unit.Partial.formula)
           (* After reiter, it's expected to have 2 initial formula *)
           ~expected:[p; p]
           ~actual:begin

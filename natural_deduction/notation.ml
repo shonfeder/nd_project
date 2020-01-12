@@ -245,7 +245,14 @@ module Figure = struct
       {i D}-inference figure whose lower formula is the next formula in the
       path." *)
 
-  (* TODO *)
+  let rec map ~formula ~rule = function
+    | Initial f -> Initial (formula f)
+    | Deriv d   -> Deriv { upper = List.map ~f:(map ~formula ~rule) d.upper
+                         ; lower = formula d.lower
+                         ; rule  = rule d.rule
+                         }
+
+  (* TODO replace with use of map *)
   let to_string
     : formula:('formula -> string) -> rule:('rule -> string) -> ('formula, 'rule) t -> string =
     fun ~formula ~rule t ->
