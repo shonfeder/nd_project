@@ -41,18 +41,18 @@ module Partial = struct
     let a =
       Figure.deriv
         []
-        (Partial.Formula.complete a_prop)
+        (Partial.Formula.of_complete a_prop)
         ~rule:Partial.Rule.hole
     in
     let b  =
       Figure.deriv
         []
-        (Partial.Formula.complete b_prop)
+        (Partial.Formula.of_complete b_prop)
         ~rule:Partial.Rule.hole
     in
     Figure.{ upper = [a; b]
-           ; lower = Partial.Formula.complete Formula.Infix.(a_prop && b_prop)
-           ; rule  = Partial.Rule.complete Complete.Rule.(make ~op:Symbol.And ~mode:Intro ())
+           ; lower = Partial.Formula.of_complete Formula.Infix.(a_prop && b_prop)
+           ; rule  = Partial.Rule.of_complete Complete.Rule.(make ~op:Symbol.And ~mode:Intro ())
            }
 
   let ex2 =
@@ -60,7 +60,7 @@ module Partial = struct
      * ————————— ∨I_
      *   A ∨ B *)
     Figure.deriv []
-      (Partial.Formula.complete Formula.Infix.(a_prop || b_prop))
+      (Partial.Formula.of_complete Formula.Infix.(a_prop || b_prop))
       ~rule:(Partial.Rule.promised Complete.Rule.(make ~op:Symbol.Or ~mode:Intro ()))
 
   let ex3 =
@@ -69,17 +69,17 @@ module Partial = struct
      *   B
      * ————— →I
      * A → B *)
-    let assum = (Figure.assume (Partial.Formula.complete a_prop)) in
+    let assum = (Figure.assume (Partial.Formula.of_complete a_prop)) in
     let deriv_b =
       Figure.deriv
         [assum]
-        (Partial.Formula.complete b_prop)
+        (Partial.Formula.of_complete b_prop)
         ~rule:Partial.Rule.hole
     in
     Figure.deriv
       [deriv_b]
-      (Partial.Formula.complete Formula.Infix.(a_prop => b_prop))
-      ~rule:Partial.Rule.(complete (Complete.Rule.(make ~op:Symbol.Imp ~mode:Intro ())))
+      (Partial.Formula.of_complete Formula.Infix.(a_prop => b_prop))
+      ~rule:Partial.Rule.(of_complete (Complete.Rule.(make ~op:Symbol.Imp ~mode:Intro ())))
 
   let a_and_a_imp_b_prop = Formula.Infix.(a_prop && (a_prop => b_prop))
 
@@ -90,17 +90,17 @@ module Partial = struct
      *       B
      * ——————————————— →I
      * (A ∧ A → B) → B *)
-    let assum = Figure.assume Partial.Formula.(complete a_and_a_imp_b_prop) in
+    let assum = Figure.assume Partial.Formula.(of_complete a_and_a_imp_b_prop) in
     let upper =
       Figure.deriv
         [assum]
-        (Partial.Formula.complete b_prop)
+        (Partial.Formula.of_complete b_prop)
         ~rule:Partial.Rule.hole
     in
     Figure.deriv
       [upper]
-      (Partial.Formula.complete a_and_a_imp_b_prop)
-      ~rule:(Partial.Rule.complete (Complete.Rule.(make ~op:Symbol.Imp ~mode:Intro ())))
+      (Partial.Formula.of_complete a_and_a_imp_b_prop)
+      ~rule:(Partial.Rule.of_complete (Complete.Rule.(make ~op:Symbol.Imp ~mode:Intro ())))
 
   let ex5 =
     (* |A ∧ A → B|   |A ∧ A → B|
@@ -109,7 +109,7 @@ module Partial = struct
      *             B
      *      ——————————————— →I
      *      (A ∧ A → B) → B *)
-    let assum = (Figure.assume (Partial.Formula.complete a_and_a_imp_b_prop)) in
+    let assum = (Figure.assume (Partial.Formula.of_complete a_and_a_imp_b_prop)) in
     let deriv_from_assum =
       Figure.deriv
         [assum]
@@ -119,18 +119,18 @@ module Partial = struct
     let deriv_of_b =
       Figure.deriv
         [deriv_from_assum; deriv_from_assum]
-        (Partial.Formula.complete b_prop)
+        (Partial.Formula.of_complete b_prop)
         ~rule:(Partial.Rule.hole)
     in
     Figure.deriv
       [deriv_of_b]
-      (Partial.Formula.complete Formula.Infix.(a_and_a_imp_b_prop => b_prop))
-      ~rule:(Partial.Rule.complete (Complete.Rule.(make ~op:Symbol.Imp ~mode:Intro ())))
+      (Partial.Formula.of_complete Formula.Infix.(a_and_a_imp_b_prop => b_prop))
+      ~rule:(Partial.Rule.of_complete (Complete.Rule.(make ~op:Symbol.Imp ~mode:Intro ())))
 
   let ex6 =
     Figure.deriv
       [Figure.Initial Partial.Formula.Hole]
-      (Partial.Formula.complete Formula.Infix.(a_and_a_imp_b_prop => b_prop))
-      ~rule:(Partial.Rule.complete (Complete.Rule.(make ~op:Symbol.Imp ~mode:Intro ())))
+      (Partial.Formula.of_complete Formula.Infix.(a_and_a_imp_b_prop => b_prop))
+      ~rule:(Partial.Rule.of_complete (Complete.Rule.(make ~op:Symbol.Imp ~mode:Intro ())))
 
 end
