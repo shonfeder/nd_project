@@ -46,7 +46,7 @@ module Make (P : Proof.S) = struct
         ;
 
         begin
-          let falsum = Formula.def F |> P.Formula.complete in
+          let falsum = Formula.def F |> P.Formula.of_complete in
           let a_and_a_imp_false_prop = P.Formula.Infix_exn.(a_prop && (a_prop => falsum)) in
           Nd_unit.test_deriv "neg intro"
             begin
@@ -103,19 +103,19 @@ module Make (P : Proof.S) = struct
             let not_a = P.Formula.Infix_exn.(!! a_prop) |> Figure.assume in
             Elim.neg a not_a
           end
-          ~concludes:(Formula.(def F) |> P.Formula.complete)
+          ~concludes:(Formula.(def F) |> P.Formula.of_complete)
         ;
 
         Nd_unit.test_deriv "absurd elim"
           begin
-            let absurd = Formula.(def F) |> P.Formula.complete |> Figure.assume in
+            let absurd = Formula.(def F) |> P.Formula.of_complete |> Figure.assume in
             Elim.absurd absurd c_prop
           end
           ~concludes:c_prop
         ;
         Nd_unit.test_deriv "Gentzen's Example 1.1"
-          (Ex_proofs.Ex_1_1.proof |> Option.map ~f:P.Figure.complete)
-          ~concludes:(Ex_proofs.Ex_1_1.proves |> P.Formula.complete)
+          (Ex_proofs.Ex_1_1.proof |> Option.map ~f:P.Figure.of_complete)
+          ~concludes:(Ex_proofs.Ex_1_1.proves |> P.Formula.of_complete)
         ;
       ]
 

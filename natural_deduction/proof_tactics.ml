@@ -26,14 +26,14 @@ let intro_imp z =
           in
           let ass_a_hole =
             Figure.deriv
-              [Figure.assume (Partial.Formula.complete a)]
+              [Figure.assume (Partial.Formula.of_complete a)]
               (*******************) ~rule:Partial.Rule.hole
               Partial.Formula.hole
           in
           Figure.deriv
             [ass_a_hole]
             (***********) ~rule:Partial.Rule.hole
-            (Partial.Formula.complete b)
+            (Partial.Formula.of_complete b)
         in
         let rule = Partial.Rule.promised (Rule.make ~op:Imp ~mode:Intro ()) in
         Figure.deriv

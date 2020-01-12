@@ -30,7 +30,7 @@ module Make (P : Proof_intf.S) = struct
     Figure.deriv
       formulas
       ~rule
-      (P.Formula.complete conclusion)
+      (P.Formula.of_complete conclusion)
 
   module Intro = struct
     open Option.Let_syntax
@@ -145,8 +145,8 @@ module Make (P : Proof_intf.S) = struct
       let%bind c_from_b = get_endformula c_from_b_fig
       in
       let%bind c = Option.some_if Formula.(equal c_from_a c_from_b) c_from_a in
-      let%bind _a_implies_c = Intro.imp (P.Formula.complete a) c_from_a_fig in
-      let%map  _b_implies_c = Intro.imp (P.Formula.complete b) c_from_b_fig in
+      let%bind _a_implies_c = Intro.imp (P.Formula.of_complete a) c_from_a_fig in
+      let%map  _b_implies_c = Intro.imp (P.Formula.of_complete b) c_from_b_fig in
       let rule = P.Rule.(make ~op:Symbol.Or ~mode:Elim ()) in
       deriv
         [a_or_b_fig; c_from_a_fig; c_from_a_fig]

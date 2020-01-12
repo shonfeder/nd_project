@@ -14,7 +14,7 @@ let print_fig fig =
 let tactics_unit_tests = Helpers.unit_suite "Proof Tactics Unit Tests"
     [
       begin
-        let p = Partial.Formula.complete Ex_proofs.Prop.x in
+        let p = Partial.Formula.of_complete Ex_proofs.Prop.x in
         (* The figure initially has a single initial formula *)
         let fig =
           let open Notation.Figure in
@@ -44,7 +44,7 @@ let tactics_unit_tests = Helpers.unit_suite "Proof Tactics Unit Tests"
       end;
 
       begin
-        let p = Partial.Formula.complete Ex_proofs.Prop.x in
+        let p = Partial.Formula.of_complete Ex_proofs.Prop.x in
         (* The figure initially has a single initial formula *)
         let fig =
           let open Notation.Figure in

@@ -23,13 +23,13 @@ module Rule = struct
 
   exception Promised_rule_with_dir
 
-  let complete r = Complete r
+  let of_complete r = Complete r
   let promised r = match Complete_rule.(r.dir) with
     | None   -> Promised r
     | Some _ -> raise Promised_rule_with_dir
   let hole      = Hole
 
-  let make ~op ~mode ?dir () = Complete_rule.make ~op ~mode ?dir () |> complete
+  let make ~op ~mode ?dir () = Complete_rule.make ~op ~mode ?dir () |> of_complete
 
   let to_complete = function
     | Complete r -> Some r
@@ -48,7 +48,7 @@ module Formula = struct
     | Promised p -> p
     | Hole       -> "..."
 
-  let complete f = Complete f
+  let of_complete f = Complete f
   let promised str = Promised str
   let hole = Hole
 
@@ -62,19 +62,19 @@ module Formula = struct
 
   let to_complete_exn f = to_complete f |> Option.value_exn
 
-  let prop s = Formula.prop s |> complete
+  let prop s = Formula.prop s |> of_complete
 
   (* Only for testing *)
   module Infix_exn = struct
     module I = Formula.Infix
     let app_op o a b =
       let a, b = to_complete_exn a, to_complete_exn b in
-      complete (o a b)
+      of_complete (o a b)
 
     let (&&) = app_op I.(&&)
     let (||) = app_op I.(||)
     let (=>) = app_op I.(=>)
-    let (!!) a = to_complete_exn a |> I.(!!) |> complete
+    let (!!) a = to_complete_exn a |> I.(!!) |> of_complete
   end
 end
 
@@ -98,5 +98,5 @@ module Figure = struct
       let%map rule  = Rule.to_complete d.rule in
       Figure.Deriv {upper; lower; rule}
 
-  let complete t = Figure.map ~formula:Formula.complete ~rule:Rule.complete t
+  let of_complete t = Figure.map ~formula:Formula.of_complete ~rule:Rule.of_complete t
 end
