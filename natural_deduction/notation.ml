@@ -252,7 +252,6 @@ module Figure = struct
                          ; rule  = rule d.rule
                          }
 
-  (* TODO replace with use of map *)
   let to_string
     : formula:('formula -> string) -> rule:('rule -> string) -> ('formula, 'rule) t -> string =
     fun ~formula ~rule t ->
