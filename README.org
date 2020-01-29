@@ -19,7 +19,45 @@ Latin use of /deductio/ as a loan-translation of Greek /apagoge/. Related:
 Deductional.
 #+END_QUOTE
 
+* Aim
+To help people (including myself) understand and internalize basic,
+constructivistic logic, we attempt to make building proofs as easy as stacking
+blocks or snapping Legos together.
+
+* Approach
+The calculus is derived from a naive implementation of natural deduction
+derive by closely following Gentzen's original paper.
+
+The interface for constructing proofs is based on ideas that occurred to me
+while reading Gentzen, playing with proof trees on paper, programming in typed
+functional languages, and surely from hearing of cool work in the world of PLT
+(hearing about [[https://hazel.org/][Hazel]] must have been an inspiration on the idea of partial proofs
+with /holes/). The basic idea is to present derivation trees as a complete
+interface for constructing proofs.
+
+The tutorial structure is inspired by an iOS game that worked through Euclids
+elements, which I recall playing back in 2012, but I cannot find. To a lesser
+extent, by the [[https://dragonbox.com/products/algebra-12][Dragon Box Algebra]] games.
+* TODO Screen Shots
 * Related work
+** TODO [[https://github.com/bobatkey/interactive-natural-deduction][Interactive Natural Deduction]] by [[https://bentnib.org/][Bob Atkey]]
+I didn't find his work until after I had completed all the designs and the core
+implementation for this project, but Atkey's project is *very* similar.
+
+From a user's perspective, the only difference is the UI: I use a different
+syntax for representing the formulas, and I have tried to make the proof tree
+serve as the sole interface to exploring the proofs (as much as possible). This
+follows from my hope of creating a game which could serve as a persons very
+first exposure to formal logic. However, these are really superficial
+differences.
+
+The more important differences will lie with the implementation. I am an
+untrained enthusiast, using this project to expand my understanding of natural
+deduction and hopefully to create a tool that other learners may use to expand
+their own understanding. Atkey is an academic programming language theory
+researcher, with theoretical sophistication well beyond my ken: tho I haven't
+had time to study his implementation yet, I'd expect it is more principled and
+illuminating than my own.
 ** TODO *Natural Deduction*: Google Play app by Laurent Théry
 https://play.google.com/store/apps/details?id=org.inria.peanoware&hl=en_US
 
